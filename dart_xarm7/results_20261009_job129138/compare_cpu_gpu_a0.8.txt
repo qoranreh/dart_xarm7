@@ -1,0 +1,8 @@
+전체 원소 3.35B 중 비트 단위 동일 81.2033%
+δ 상대차 ‖δ_A−δ_B‖/‖δ_A‖ 상위 5개 키:
+  3.57e-01  동일 32.09%  최대 34841 ulp  ‖δ‖=5.68  PaliGemma/llm/layers/attn/attn_vec_einsum/w (75.5M)
+  3.21e-01  동일 31.56%  최대 34332 ulp  ‖δ‖=0.685  time_mlp_in/kernel (1.0M)
+  3.09e-01  동일 34.59%  최대 35006 ulp  ‖δ‖=6.1  PaliGemma/llm/layers/attn/q_einsum/w (75.5M)
+  3.04e-01  동일 25.98%  최대 35138 ulp  ‖δ‖=4.73  PaliGemma/img/Transformer/encoderblock/MultiHeadDotProductAttention_0/value/kernel (35.8M)
+  3.01e-01  동일 31.97%  최대 34560 ulp  ‖δ‖=4.59  PaliGemma/llm/layers/attn/attn_vec_einsum_1/w (37.7M)
+전체 δ 상대차: 1.711e-01

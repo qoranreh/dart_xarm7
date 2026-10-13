@@ -1,0 +1,2 @@
+{"task_id": 4, "episode": 0, "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate", "success": false, "steps": 230, "sec": 81.2}
+{"task_id": 9, "episode": 0, "task": "pick up the black bowl on the wooden cabinet and place it on the plate", "success": true, "steps": 161, "sec": 54.5}

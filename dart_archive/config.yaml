@@ -1,0 +1,5 @@
+benchmark_root: /var/tmp/pbs.128706.ECE-util1/dart/dart/third_party/libero-view/libero/libero
+bddl_files: /var/tmp/pbs.128706.ECE-util1/dart/dart/third_party/libero-view/libero/libero/bddl_files
+init_states: /var/tmp/pbs.128706.ECE-util1/dart/dart/third_party/libero-view/libero/libero/init_files
+datasets: /var/tmp/pbs.128706.ECE-util1/dart/dart/third_party/libero-view/libero/datasets
+assets: /var/tmp/pbs.128706.ECE-util1/dart/dart/third_party/libero-view/libero/libero/assets

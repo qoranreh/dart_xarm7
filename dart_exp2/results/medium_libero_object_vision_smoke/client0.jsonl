@@ -1,0 +1,2 @@
+{"task_id": 0, "episode": 0, "task": "pick up the alphabet soup and place it in the basket", "success": false, "steps": 290, "sec": 67.8}
+{"task_id": 5, "episode": 0, "task": "pick up the tomato sauce and place it in the basket", "success": true, "steps": 158, "sec": 35.0}

@@ -1,0 +1,19 @@
+# 화이트리스트: DART 폴더만 추적 (나머지 ~/hayeon 내용은 무시)
+/*
+!/.gitignore
+!/README.md
+!/dart_exp2/
+!/dart_exp3/
+!/dart_xarm7/
+!/dart_archive/
+
+# 큰 파일·생성물 제외
+__pycache__/
+*.pyc
+*.log
+logs/
+videos/
+*.mp4
+dart_xarm7/data/
+dart_xarm7/report/
+dart_xarm7/renders/

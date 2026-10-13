@@ -1,0 +1,2 @@
+{"task_id": 1, "episode": 0, "task": "pick up the cream cheese and place it in the basket", "success": true, "steps": 143, "sec": 32.7}
+{"task_id": 6, "episode": 0, "task": "pick up the butter and place it in the basket", "success": false, "steps": 290, "sec": 61.8}
