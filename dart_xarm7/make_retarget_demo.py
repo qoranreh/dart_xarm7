@@ -92,7 +92,7 @@ _, Rg_x, Rh_x = frames(xarm)
 R_off_x = Rg_x.T @ Rh_x  # xArm7: grip_site → right_hand (단위행렬이어야 함)
 
 rec = {k: [] for k in ("image", "wrist_image", "state", "actions", "eef_pos", "eef_quat", "gripper_qpos_raw", "pad_gap",
-                       "track_err_pos", "track_err_rot", "clipped")}
+                       "track_err_pos", "track_err_rot", "clipped", "pos_raw", "rot_raw")}
 NS = json.load(open(os.path.expandvars("$OPENPI_DATA_HOME/openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json")))["norm_stats"]["actions"]
 ROT_Q01, ROT_Q99 = np.array(NS["q01"][3:6]), np.array(NS["q99"][3:6])
 first_success = None
@@ -114,6 +114,8 @@ for t in range(len(src_actions)):
     rec["gripper_qpos_raw"].append(obs["robot0_gripper_qpos"].copy())
     rec["pad_gap"].append(X.pad_surface_gap(xarm))
     rec["clipped"].append(bool(np.any(np.abs(np.concatenate([dpos_raw, drot_raw])) > 1)))
+    rec["pos_raw"].append(dpos_raw.copy())  # 자르기 전 액션 (기록용, 액션 계산과 무관)
+    rec["rot_raw"].append(drot_raw.copy())
     obs, _, done, _ = xarm.step(a)
     pa, Ra, _ = frames(xarm)  # 스텝 뒤 목표 포즈와의 차이 (추종 오차)
     rec["track_err_pos"].append(float(np.linalg.norm(tgt_pos[t] - pa)))
@@ -122,12 +124,17 @@ for t in range(len(src_actions)):
         first_success = t + 1
 success = bool(xarm.env._check_success())
 arr = {k: np.array(v) for k, v in rec.items()}
+# 이 프로세스에서 libero_xarm7 가 실제로 읽은 조건 값 (실험 6: 환경변수가 데모 생성에 적용됐는지 기록)
+ENV_META = f"XARM7_COLOR={X.COLOR}, XARM7_DYNAMICS={X.DYNAMICS}"
 np.savez_compressed(out / f"{tag}_{SUFFIX}.npz", **arr, task=task.language,
-                    target_pos=np.array(tgt_pos), target_hand_rot=np.array(tgt_hand_rot))
+                    target_pos=np.array(tgt_pos), target_hand_rot=np.array(tgt_hand_rot),
+                    xarm7_color=X.COLOR, xarm7_dynamics=X.DYNAMICS, env_meta=ENV_META)
 
 src = np.load(out / f"{tag}_Panda.npz")
 summ = {
-    "method": "MimicGen-style retarget (target_pose tracking, gripper copied, no noise)" + (" + rotation clipped to norm q01..q99" if args.rot_clip == "quantile" else ""),
+    "method": "MimicGen-style retarget (target_pose tracking, gripper copied, no noise)" + (" + rotation clipped to norm q01..q99" if args.rot_clip == "quantile" else "")
+              + f" [{ENV_META}]",
+    "xarm7_color": X.COLOR, "xarm7_dynamics": X.DYNAMICS,
     "panda_success": panda_success, "xarm_success_at_end": success, "xarm_first_success_step": first_success,
     "frames": len(src_actions), "R_off_panda_const_err": max(off_err),
     "R_off_xarm_is_identity_err": float(np.abs(R_off_x - np.eye(3)).max()),

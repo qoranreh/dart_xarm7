@@ -1,0 +1,12 @@
+{
+ "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+ "demo": "demo_0",
+ "n_actions": 98,
+ "wait": 10,
+ "Panda": {
+  "success_at_end": true,
+  "first_success_step": 81,
+  "success_after_extra_wait": null,
+  "frames": 98
+ }
+}

@@ -17,6 +17,12 @@ robosuite 1.5 → 1.4 API 차이에 맞춘 부분:
                   그리퍼 speed 0.01 (PandaGripper 와 같은 값 → 닫힘 13스텝으로 Panda 와 같음). 본 실험용.
   - "robosuite" : v1.5.2 원본 그대로 — frictionloss 1 (OSC 이동 응답 ~30% 작음), speed 0.2 (닫힘 7스텝). 동역학 차이 ablation 용.
   측정값은 action_space_check.json / XARM7_NOTES.md.
+
+외형 색 (환경 변수 XARM7_COLOR, 기본 "white", 실험 6 의 시각 요인):
+  - "white" : XML 그대로 (아무것도 바꾸지 않음 → 이전 코드와 같은 모델·렌더).
+  - "dark"  : XML 로드 후 material "white" 의 rgba 만 "0.15 0.15 0.15 1" 로 바꿈. 이 material 을 쓰는 geom 은
+              팔 link_base~link6 (link7 은 visual geom 없음) + 그리퍼 몸통 base_link 뿐. 손가락·너클(material black),
+              패드(geom rgba), site, 물리 속성은 그대로. XML 파일은 수정하지 않는다.
 """
 
 import os
@@ -35,6 +41,20 @@ assert DYNAMICS in ("panda", "robosuite"), f"XARM7_DYNAMICS={DYNAMICS!r} (panda 
 ARM_FRICTIONLOSS = 0.0 if DYNAMICS == "panda" else None  # None = XML 값(1.0) 유지
 GRIPPER_SPEED = 0.01 if DYNAMICS == "panda" else 0.2
 
+COLOR = os.environ.get("XARM7_COLOR", "white")
+COLOR_RGBA = {"white": None, "dark": "0.15 0.15 0.15 1"}  # None = XML 값(1 1 1 1) 유지
+assert COLOR in COLOR_RGBA, f"XARM7_COLOR={COLOR!r} ({' | '.join(COLOR_RGBA)})"
+
+
+def _recolor_white_material(model):
+    """XARM7_COLOR 가 white 가 아니면 이 모델(로봇 또는 그리퍼)의 material "white" rgba 를 바꾼다. white 면 아무것도 안 함."""
+    rgba = COLOR_RGBA[COLOR]
+    if rgba is None:
+        return
+    mats = [m for m in model.asset.findall("material") if m.get("name") == model.naming_prefix + "white"]
+    assert len(mats) == 1, f"{type(model).__name__}: material {model.naming_prefix}white 가 {len(mats)}개"
+    mats[0].set("rgba", rgba)
+
 # LIBERO MountedPanda 의 초기 그리퍼 포즈와 맞춘 xArm7 관절값 (ik_init_qpos.py, 결과 ik_init_qpos.json).
 # 목표: grip_site 위치 = Panda 것, right_hand 자세 = Panda 것 → 손가락 축과 eef_quat 관측값이 Panda 와 같아진다.
 # robosuite 1.5.2 기본값 [0, 0, 0, 0.39π, 0, 0.39π, 0] 은 그리퍼가 3~4cm 높고 z축으로 180° 돌아가 있었다.
@@ -48,6 +68,7 @@ class XArm7GripperBase(GripperModel):
 
     def __init__(self, idn=0):
         super().__init__(os.path.join(_ASSETS, "grippers/xarm7_gripper.xml"), idn=idn)
+        _recolor_white_material(self)
 
     def format_action(self, action):
         return action
@@ -91,6 +112,7 @@ class MountedXArm7(ManipulatorModel):
         self.set_joint_attribute(attrib="damping", values=np.array((0.1, 0.1, 0.1, 0.1, 0.1, 0.01, 0.01)))
         if ARM_FRICTIONLOSS is not None:
             self.set_joint_attribute(attrib="frictionloss", values=np.full(7, ARM_FRICTIONLOSS))
+        _recolor_white_material(self)
 
     @property
     def default_mount(self):

@@ -1,0 +1,2 @@
+{"tag": "v0_check_all", "robot": "XArm7", "task_id": 0, "episode": 1, "task": "pick up the black bowl between the plate and the ramekin and place it on the plate", "success": true, "steps": 70, "sec": 29.2, "error": null, "ik_pos_err": 8.599304253577216e-07}
+{"tag": "v0_check_all", "robot": "XArm7", "task_id": 0, "episode": 6, "task": "pick up the black bowl between the plate and the ramekin and place it on the plate", "success": true, "steps": 129, "sec": 48.5, "error": null, "ik_pos_err": 1.3464454096203117e-06}

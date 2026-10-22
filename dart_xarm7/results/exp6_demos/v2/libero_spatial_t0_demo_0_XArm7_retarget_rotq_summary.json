@@ -1,0 +1,57 @@
+{
+ "method": "MimicGen-style retarget (target_pose tracking, gripper copied, no noise) + rotation clipped to norm q01..q99 [XARM7_COLOR=white, XARM7_DYNAMICS=robosuite]",
+ "xarm7_color": "white",
+ "xarm7_dynamics": "robosuite",
+ "panda_success": true,
+ "xarm_success_at_end": true,
+ "xarm_first_success_step": 74,
+ "frames": 98,
+ "R_off_panda_const_err": 2.9976021664879227e-15,
+ "R_off_xarm_is_identity_err": 2.55351295663786e-15,
+ "panda_actions_match_previous_recording": true,
+ "steps_with_clipped_action": 28,
+ "track_err_pos_cm": {
+  "mean": 3.881084673671252,
+  "max": 6.56042189423187
+ },
+ "track_err_rot_deg": {
+  "mean": 4.038288802892951,
+  "max": 8.472581580475895
+ },
+ "eef_vs_panda_cm": {
+  "mean": 1.772809259365048,
+  "max": 4.096808699717721
+ },
+ "action_absdiff_vs_source_mean": [
+  0.21889999508857727,
+  0.06790000200271606,
+  0.21559999883174896,
+  0.024700000882148743,
+  0.11069999635219574,
+  0.016899999231100082,
+  0.0
+ ],
+ "action_absdiff_vs_source_max": [
+  0.7160999774932861,
+  0.16449999809265137,
+  0.48010000586509705,
+  0.09440000355243683,
+  0.2678000032901764,
+  0.05979999899864197,
+  0.0
+ ],
+ "transfer": {
+  "ik_q": [
+   -0.0013093773483094785,
+   -0.03949693390447985,
+   -0.0009016216782621613,
+   1.0865903260535112,
+   -0.006371046844584283,
+   1.18281007328699,
+   -3.134060404786958
+  ],
+  "ik_pos_err": 7.905608781476318e-07,
+  "ik_rot_err": 6.68797908466079e-07,
+  "missing_joints": []
+ }
+}

@@ -1,0 +1,7 @@
+2026-10-22 14:28:46 === stage1 데모 시작 (job 130582.ECE-util1, ece-agpu7) conds: v0 v1 v2 v3 ===
+2026-10-22 14:29:18 Panda 녹화 rc=0 32s: Panda {"success_at_end": true, "first_success_step": 81, "success_after_extra_wait": null, "frames": 98}
+2026-10-22 14:30:12 v0 rc=0 54s: XARM7_COLOR=white, XARM7_DYNAMICS=panda | success True first 73
+2026-10-22 14:31:07 v1 rc=0 55s: XARM7_COLOR=dark, XARM7_DYNAMICS=panda | success True first 73
+2026-10-22 14:32:03 v2 rc=0 56s: XARM7_COLOR=white, XARM7_DYNAMICS=robosuite | success True first 74
+2026-10-22 14:32:57 v3 rc=0 54s: XARM7_COLOR=dark, XARM7_DYNAMICS=robosuite | success True first 74
+2026-10-22 14:32:57 === stage1 데모 ALL_DONE ===
