@@ -5,9 +5,9 @@ H1 시각 가설: δ 의 효과가 vision+VLM 에 담김 / H2 액션 가설: act
 | 조건 | XARM7_COLOR | XARM7_DYNAMICS | 상태 |
 |---|---|---|---|
 | v0 | white | panda | 단계 0 (마스크 4개 + 같은 잡 θ0·θ* 재평가) |
-| v1 | dark | panda | 단계 1: 데모·데이터셋 완료 (FT 전) |
-| v2 | white | robosuite | 단계 1: 데모·데이터셋 완료 (FT 전) |
-| v3 | dark | robosuite | 단계 1: 데모·데이터셋 완료 (FT 전) |
+| v1 | dark | panda | 단계 2: θ_tgt·θ* α=0.5 완료 (평가 전) |
+| v2 | white | robosuite | 단계 2: θ_tgt·θ* α=0.5 완료 (평가 전) |
+| v3 | dark | robosuite | 단계 2: θ_tgt·θ* α=0.5 완료 (평가 전) |
 
 고정 (모든 조건): libero_spatial task 0 demo_0 데모, Panda init state → xArm7 IK 전이, 카메라, XARM7_INIT_QPOS, seed 7,
 FT (pi05_libero_oneshotft, batch 64, 1000 step), 평가 (10 태스크 × 10 에피소드, t0 = adapt, t1~9 = held-out), α = 0.5, 합성 = 공식 CPU.
@@ -239,3 +239,105 @@ v0 와 동일하게 `patches/dart_oneshot_ft.patch` 다시 적용 (규칙 4 수�
 
 신규·수정 파일 (단계 1): 수정 `src/libero_xarm7/__init__.py`, `make_retarget_demo.py`, `run_eval_masked.sh` (조건표를 exp6_cond.sh 로) /
 신규 `exp6_cond.sh`, `fetch_hdf5_demo.py`, `run_exp6_stage1_demos.sh`, `check_exp6_demos.py`, `check_xarm7_color.py`, `renders/v1/`, `data/lerobot/{v1,v2,v3}/`, `results/exp6_demos/`.
+
+---
+
+## 단계 2 — 조건별 one-shot FT + DART 합성 (2026-10-22, 잡 130582, ece-agpu7)
+
+실행: `setsid nohup bash run_exp6_stage2.sh v1 v2 v3` (신규) = `run_oneshot_ft_cond.sh v1 v2 v3` (신규) → `run_dart_merge_cond.sh <cond> 0.5` (신규) ×3 + HF 백업 → `compare_merge.py` ×3.
+14:53 시작 → 22:58 끝 (8시간 5분). 진행 기록 `$DART_ROOT/logs/exp6/stage2_status.txt`, 홈 사본 `logs/oneshot_ft_exp6/`, `logs/exp6_stage2/`.
+
+### 2-0. 러너
+- `run_oneshot_ft_cond.sh <cond…>`: `run_oneshot_ft.sh` 복제. diff 로 확인한 차이는 타깃만 학습, DATA_TGT·출력·로그 경로를 조건별로 바꾼 것뿐
+  (`run_one` 의 base 를 인자로). config pi05_libero_oneshotft, batch 64, 1,000 step, mem 0.9, OOM 대응 순서, bf16 변환·검증, OPENPI_SAVE_TRAIN_STATE=0, JAX 캐시 경로는 동일.
+  - 시작 시 `check_data`: DATA_TGT 의 `meta/info.json`, 조건 npz 의 `env_meta`·summary `method` 를 status 에 출력하고,
+    경로에 `/<cond>/` 포함 + npz 조건 = exp6_cond 매핑 + **데이터셋 98 프레임 이미지·액션 = 그 조건 npz** 를 확인 (틀리면 학습 안 함).
+    시험: v1 이름 경로가 v3 데이터셋을 가리키게 하자 "데이터셋 이미지 != 조건 npz 이미지" 로 거부됨. `DRY_RUN=1` 로 확인만 가능.
+  - 각 FT 후 bf16 변환 → HF `<cond>/oneshot_tgt/` 백업 (백그라운드, 다음 FT 와 겹침).
+- `run_dart_merge_cond.sh <cond> <α>`: `run_dart_merge.sh` 복제. 공식 `uv run -m domain_arithmetic.dart` (CPU 강제) 인자는 policy_src (= v0 θ_src)·policy_tgt·output 경로만 다름.
+  RSS 10초 기록 유지. 시작 전 평가 클라이언트(`eval_xarm7.py`)가 돌고 있으면 거부. 합성은 FT·업로드가 다 끝난 뒤 순차로만.
+- 사전 확인: GPU 프로세스 없음, 평가·합성·학습 없음. **`/var/tmp` 여유는 10G (<14G)** 지만 체크포인트·JAX 캐시·wandb 가 모두 `$DART_ROOT` (= /dev/shm, 733G) 에 놓임
+  → 러너의 원래 검사 (`df` 를 체크포인트 파일시스템에) 기준으로 통과. /var/tmp 자체는 이 단계에서 쓰지 않음.
+
+**이상 징후 (해결):** 첫 시도에서 `ImportError: libX11.so.6` → DataLoader 무한 대기 (GPU 73GB 잡고 사용률 0%).
+2026-10-08 과 같은 함정 (uv venv 에 opencv-python + headless 가 같이 깔림, 새 잡 복원으로 재발). 프로세스 그룹을 종료하고
+`uv pip install --reinstall --no-deps opencv-python-headless==4.11.0.86` (같은 버전) → `import cv2, cv2.typing` OK → 14:53 재시작.
+`restore_env.sh` 의 uv sync 단계에 이 재설치·확인을 추가함. 첫 시도 로그: `logs/oneshot_ft_exp6/v1_tgt_attempt1_libX11.log`.
+
+### 2-1. FT 로그 (타깃, A100 1장, batch 64, mem 0.9, OOM 없음)
+
+| 조건 | 전체 시간 (finetune.sh) | loss step 0 → 990 | 처음 50 스텝 평균 | 마지막 100 스텝 평균 | grad_norm step 0 → 990 (마지막 100 평균) |
+|---|---|---|---|---|---|
+| v0 (10-10, 잡 129459, 참고) | 7479s (2:05) | 0.1218 → 0.0026 | 0.0330 | 0.0022 | 0.507 → 0.053 (0.051) |
+| v1 dark·panda | 7363s (2:02) | **0.1398** → 0.0019 | 0.0365 | 0.0022 | 0.636 → 0.045 (0.052) |
+| v2 white·robosuite | 7173s (1:59) | **0.1260** → 0.0017 | 0.0344 | 0.0021 | 0.557 → 0.043 (0.049) |
+| v3 dark·robosuite | 7170s (1:59) | **0.1456** → 0.0021 | 0.0400 | 0.0021 | 0.641 → 0.046 (0.051) |
+
+(처음 50 = 로그된 step 0~40, 마지막 100 = step 900~990, 10스텝 간격 기록.)
+
+**해석:** step 0 loss (= 학습 전 θ0 가 그 조건의 타깃 데모에서 내는 loss) 는 **색만 바꾼 v1 이 +15%**, **동역학만 바꾼 v2 는 +3%**, 둘 다 바꾼 v3 는 +20%.
+v1 은 액션이 v0 와 비트 단위로 같고 이미지 색만 다르므로, θ0 에게는 외형(색) 변화가 동역학 변화보다 훨씬 "낯선" 입력이다.
+(step 0 loss 는 배치 하나의 추정치. config seed 가 같아 조건 간 같은 프레임·노이즈로 계산됐을 것으로 보이나 확인은 안 함.)
+네 조건 모두 50 스텝 안에 같은 수준으로 내려가고 마지막 100 스텝 평균은 0.0021~0.0022 로 같다.
+
+### 2-2. 체크포인트·HF 백업 (`qoranreh/dart-xarm7-oneshot`, 파일 수·크기 HF 와 대조)
+
+| 조건 | θ_tgt (`$DART_ROOT/ckpts/<cond>/oneshot_tgt/pi05_libero_oneshotft/original/999`) | bf16 검증 | HF `<cond>/oneshot_tgt/` | θ* α=0.5 (`$DART_ROOT/ckpts/<cond>/dart_a0.5`) | HF `<cond>/dart_a0.5/` |
+|---|---|---|---|---|---|
+| v1 | 4.9G | 51 배열, 다른 배열 0 | 68/68 파일, 크기 일치 | 4.9G | 35/35, 일치 |
+| v2 | 4.9G | 51, 0 | 45/45, 일치 | 4.9G | 36/36, 일치 |
+| v3 | 4.9G | 51, 0 | 79/79, 일치 | 4.9G | 36/36, 일치 |
+
+(파일 수 차이는 orbax OCDBT 조각 수 차이 — 각자 HF 와 일치.) fp32 params 는 `convert_ckpt_bf16.py` 가 bf16 저장 전에 지움 (train_state 는 처음부터 저장 안 함).
+
+### 2-3. DART 합성 (공식 CPU 경로, α=0.5)
+
+| 조건 | wall | peak RSS | END rc | merge_config (v0 θ* 대비) |
+|---|---|---|---|---|
+| v1 | 1289s (21:29) | 44.8 GiB | 0 | policy_tgt 경로만 다름 (seed 42, merge_scope all, scaling_coef 0.5 동일) |
+| v2 | 1298s (21:38) | 45.0 GiB | 0 | 〃 |
+| v3 | 1317s (21:57) | 45.0 GiB | 0 | 〃 |
+
+로그 `$DART_ROOT/logs/dart_<cond>_a0.5.{log,rss}` (홈 사본 `logs/exp6_stage2/`). 합성 중 평가 클라이언트 없음 (러너 검사 + 순차 실행).
+
+### 2-4. δ 비교 — v0 θ* 대비 (`compare_merge.py`, 모듈별 요약 추가)
+δ = θ* − θ0 (α 가 모두 0.5 라 DART δ 의 비교와 같음). 모듈 경계는 마스크 평가와 같은 `serve_masked.module_of`.
+`compare_merge.py` 에 모듈별 요약을 추가함 (기존 출력 유지). 자기 자신과 비교 시 상대차 0 / 노름비 1 / cos 1 로 검증.
+
+| 비교 | vision: 상대차 / 노름비 / cos | VLM | expert | 전체 상대차 |
+|---|---|---|---|---|
+| v0 vs **v1** (색) | 0.907 / 0.993 / **0.586** | 0.857 / 0.990 / 0.629 | 0.670 / 1.007 / **0.777** | 0.832 |
+| v0 vs **v2** (동역학) | 0.991 / 0.990 / 0.504 | 0.930 / 1.000 / 0.568 | 0.834 / 1.002 / 0.653 | 0.925 |
+| v0 vs **v3** (둘 다) | 1.031 / 1.009 / 0.473 | 0.980 / 1.008 / 0.523 | 0.851 / 1.010 / 0.642 | 0.967 |
+
+(상대차 = ‖δ_v0 − δ_c‖/‖δ_v0‖, 노름비 = ‖δ_c‖/‖δ_v0‖, ‖δ_v0‖: vision 9.58, VLM 15.37, expert 8.91.)
+
+**보조 지표 해석 (주의해서):**
+- 노름비는 모든 모듈·조건에서 0.99~1.01 → 조건이 δ 의 **크기**는 바꾸지 않고 **방향**만 바꾼다.
+- 방향 일치(cos)는 모든 조건에서 **expert 가 가장 높고 (0.64~0.78), vision 이 가장 낮다 (0.47~0.59)**. 색만 바꾼 v1 에서 vision 이 가장 많이 바뀌는 것은 예상대로다.
+  하지만 동역학만 바꾼 v2 에서도 vision δ 가 expert δ 보다 더 많이 바뀐다 (0.50 vs 0.65). "동역학 차이는 expert δ 에 담긴다"는 예상과는 반대 방향이다.
+- **잡음 바닥이 없다.** FT 는 GPU 비결정적이다 (v0 를 두 번 학습했을 때 src 마지막 loss 0.0015 vs 0.0017). 그래서 cos 0.5~0.8 중 얼마가 조건 효과이고 얼마가 재학습 잡음인지 지금은 알 수 없다.
+  v0 θ_tgt 를 같은 설정으로 한 번 더 학습·합성해 "v0 vs v0 재학습" cos 를 재면 기준선이 생긴다 (FT 2h + 합성 22분, 제안 — 실행 안 함).
+- 결론은 단계 3 의 마스크 평가 성공률로 판단한다. 이 표는 보조 지표다.
+
+### 2-5. 환경 상태 메모 (2026-10-22 23:00)
+| 항목 | 값 |
+|---|---|
+| 잡 / 노드 | 130582.ECE-util1 / ece-agpu7 |
+| `$DART_ROOT` | → `/dev/shm/introai34_dart_130582` (**77G**), /dev/shm 여유 703G, /var/tmp 10G |
+| 홈 | 27,789 MiB (쿼터 ≈28GiB 추정, 여유 ≈0.9GiB) |
+| 저장소 | @1b23c4f + `dart_oneshot_ft.patch`, `.venv` 의 opencv-python-headless 재설치함 |
+| 체크포인트 | θ0 `$OPENPI_DATA_HOME/openpi-assets/checkpoints/pi05_libero` / θ_src (공유) `ckpts/oneshot_src/…/999` / v0: `ckpts/oneshot_tgt/…/999`, `ckpts/dart_a0.5` / v1~v3: `ckpts/<cond>/oneshot_tgt/pi05_libero_oneshotft/original/999`, `ckpts/<cond>/dart_a0.5` |
+| HF 백업 | `qoranreh/dart-xarm7-oneshot`: oneshot_src/, oneshot_tgt/, dart_a{0.5,0.8,1.0}/ (v0), `v{1,2,3}/oneshot_tgt/`, `v{1,2,3}/dart_a0.5/` |
+
+단계 3 (평가 7개 × 3조건) 명령 예:
+```bash
+T0=$OPENPI_DATA_HOME/openpi-assets/checkpoints/pi05_libero; CK=$DART_ROOT/ckpts
+TAG=v1_theta0 COND=v1 BASE=$T0 TUNED=$CK/v1/dart_a0.5 MODULES=none bash run_eval_masked.sh
+TAG=v1_dart_a0.5 COND=v1 BASE=$T0 TUNED=$CK/v1/dart_a0.5 MODULES=all bash run_eval_masked.sh
+TAG=v1_theta_tgt COND=v1 BASE=$CK/v1/oneshot_tgt/pi05_libero_oneshotft/original/999 TUNED=<같은 폴더> MODULES=none CONFIG=pi05_libero_oneshotft bash run_eval_masked.sh
+TAG=v1_mask_vision … MODULES=vision   (vlm, expert, vision,vlm 도 같은 형식)
+```
+조건 하나 7개 ≈ 2.5시간 (모델당 약 21분), 3조건 ≈ 7.5시간. 잡 종료 시 /dev/shm 정리 필요.
+
+신규·수정 (단계 2): 신규 `run_oneshot_ft_cond.sh`, `run_dart_merge_cond.sh`, `run_exp6_stage2.sh` / 수정 `compare_merge.py` (모듈별 요약 추가), `restore_env.sh` (opencv 재설치).

@@ -1,7 +1,9 @@
 """평가 결과(results/<tag>/client*.jsonl)를 모델 × 태스크 성공률 표로 정리한다.
 
   /usr/bin/python3 ~/hayeon/dart_xarm7/summarize_eval.py [tag ...]
+  SUMMARY_JSON=<경로> 로 json 출력 위치를 바꿀 수 있다 (기본 results/summary.json — 실험 6 은 조건별 파일로 써서 기존 것을 덮어쓰지 않음).
 """
+import os
 import collections
 import glob
 import json
@@ -61,4 +63,4 @@ for tag in tags:
 print()
 for tag, v in out.items():
     print(f"{tag}: errors={v['errors']} 성공 에피소드 평균 스텝={v['mean_steps_success']} 실패 중 시간초과={v['fail_timeouts']}")
-(R / "summary.json").write_text(json.dumps(out, indent=1, ensure_ascii=False))
+pathlib.Path(os.environ.get("SUMMARY_JSON", R / "summary.json")).write_text(json.dumps(out, indent=1, ensure_ascii=False))

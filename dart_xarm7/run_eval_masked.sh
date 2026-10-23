@@ -66,6 +66,7 @@ grep -E "module (vision|vlm|expert)" "$EV/server.log" | sed 's/^.*module/module/
 source ~/hayeon/dart_xarm7/client_env.sh
 export LP_NUM_THREADS=1 OMP_NUM_THREADS=1
 export XARM7_COLOR XARM7_DYNAMICS
+export EVAL_CKPT_INFO="serve_masked base=$BASE tuned=$TUNED modules=$MODULES config=$CONFIG"   # 클라이언트 로그 첫 줄용
 PIDS=()
 for c in $(seq 0 $((NCLIENT - 1))); do
   $LIBERO_PY ~/hayeon/dart_xarm7/eval_xarm7.py --port "$PORT" --robot "$ROBOT" --task-suite-name "$SUITE" \

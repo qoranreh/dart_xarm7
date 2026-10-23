@@ -47,8 +47,8 @@ def heldout(rows, trials=None):
 
 
 def table1(tags):
-    print("| 모델 | 태그 | adapt t0 | held-out t1–9 (95% CI) | 전체 | errors |")
-    print("|---|---|---|---|---|---|")
+    print("| 모델 | 태그 | t0 t1 … t9 (성공/10) | adapt t0 | held-out t1–9 (95% CI) | 전체 | errors |")
+    print("|---|---|---|---|---|---|---|")
     out = {}
     for name, tag in tags:
         rows = load(tag)
@@ -61,7 +61,8 @@ def table1(tags):
         out[tag] = {"adapt": [sum(a), len(a)], "heldout": [sum(h), len(h)], "heldout_ci95": [lo, hi], "errors": e,
                     "per_task": {t: [sum(r["success"] for r in rows if r["task_id"] == t), sum(1 for r in rows if r["task_id"] == t)]
                                  for t in range(10)}}
-        print(f"| {name} | `{tag}` | {sum(a)}/{len(a)} ({100 * sum(a) / max(1, len(a)):.0f}%) | "
+        pt = " ".join(str(out[tag]["per_task"][t][0]) for t in range(10))
+        print(f"| {name} | `{tag}` | {pt} | {sum(a)}/{len(a)} ({100 * sum(a) / max(1, len(a)):.0f}%) | "
               f"{sum(h)}/{len(h)} = **{100 * sum(h) / max(1, len(h)):.0f}%** ({100 * lo:.0f}–{100 * hi:.0f}) | "
               f"{100 * sum(r['success'] for r in rows) / len(rows):.0f}% | {e} |")
     return out
@@ -77,7 +78,11 @@ def table2(cond, n_boot=2000, seed=0):
     Bb, Bf = bs(b), bs(f)
     gap = f.mean() - b.mean()
     print(f"분모 θ* − θ0 (held-out, `{cond}_dart_a0.5` − `{cond}_theta0`) = {100 * f.mean():.1f} − {100 * b.mean():.1f} = "
-          f"**{100 * gap:+.1f}%p** (Fisher p={fisher_p(f.tolist(), b.tolist()):.3g})\n")
+          f"**{100 * gap:+.1f}%p** (Fisher p={fisher_p(f.tolist(), b.tolist()):.3g})")
+    tg = heldout(load(f"{cond}_theta_tgt"))
+    if tg:
+        print(f"θ* vs θ_tgt (held-out): {int(f.sum())}/{len(f)} vs {sum(tg)}/{len(tg)}, Fisher p={fisher_p(f.tolist(), tg):.3g}")
+    print()
     print(f"| 마스크 (δ 를 넣은 모듈) | held-out | − θ0 | 회복률 {cond} (부트스트랩 95%) | p vs θ0 | p vs θ* | 실험 2 회복률 (시점 medium) |")
     print("|---|---|---|---|---|---|---|")
     out = {"gap": gap, "theta0": b.mean(), "theta_star": f.mean()}

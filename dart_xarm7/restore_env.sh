@@ -25,7 +25,10 @@ repo() {
   [ -d dart ] || git clone --recurse-submodules https://github.com/snumprlab/dart.git
   cd dart && git checkout 1b23c4f && git submodule update --init --recursive && git submodule status
 }
-uv_sync_fn() { cd "$DART_REPO" && uv sync --python 3.11; }
+uv_sync_fn() {  # opencv-python(GUI)+headless 가 같이 깔려 cv2 가 libX11 을 찾다 실패 → FT DataLoader 무한 대기. headless 재설치로 해결 (2026-10-08, 10-22 재발)
+  cd "$DART_REPO" && uv sync --python 3.11 && uv pip install --reinstall --no-deps opencv-python-headless==4.11.0.86 &&
+  .venv/bin/python -c "import cv2, cv2.typing; print('cv2', cv2.__version__, 'OK')"
+}
 theta0() { cd "$DART_REPO" && uv run python -c "from openpi.shared import download as d; print(d.maybe_download('gs://openpi-assets/checkpoints/pi05_libero'))"; }
 hf_ckpts() { cd "$DART_REPO" && HF_TOKEN_PATH=$HOME/.cache/huggingface/token HF_HUB_DISABLE_PROGRESS_BARS=1 .venv/bin/python ~/hayeon/dart_xarm7/fetch_ckpts_hf.py "$DART_ROOT/ckpts" oneshot_src oneshot_tgt dart_a0.5; }
 libero_venv() {

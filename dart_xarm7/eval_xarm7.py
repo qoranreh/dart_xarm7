@@ -17,6 +17,7 @@ import collections
 import dataclasses
 import json
 import logging
+import os
 import pathlib
 import time
 
@@ -62,6 +63,9 @@ def make_env(task, robot, res, seed):
 
 
 def main(args: Args) -> None:
+    # 실험 6: 이 클라이언트에 실제로 적용된 조건·체크포인트를 첫 줄에 남긴다 (로그만, 동작 무관). EVAL_CKPT_INFO 는 러너가 export.
+    logging.info("eval env: XARM7_COLOR=%s XARM7_DYNAMICS=%s robot=%s ckpt=%s tag=%s", getattr(X, "COLOR", "white(분기 없음)"),
+                 X.DYNAMICS, args.robot, os.environ.get("EVAL_CKPT_INFO", "(미지정)"), args.tag)
     np.random.seed(args.seed)
     suite = benchmark.get_benchmark_dict()[args.task_suite_name]()
     max_steps = MAX_STEPS[args.task_suite_name]
@@ -121,6 +125,7 @@ def main(args: Args) -> None:
                "success": bool(done), "steps": t - args.num_steps_wait, "sec": round(time.time() - t_start, 1), "error": err}
         if args.robot != "Panda":
             rec["ik_pos_err"] = tinfo["ik_pos_err"]
+            rec["xarm7_color"], rec["xarm7_dynamics"] = getattr(X, "COLOR", "white"), X.DYNAMICS  # 기록만
         out.write(json.dumps(rec) + "\n")
         out.flush()
         logging.info("%s task %d ep %d success=%s steps=%d %.0fs", args.tag, task_id, ep, done, rec["steps"], rec["sec"])
