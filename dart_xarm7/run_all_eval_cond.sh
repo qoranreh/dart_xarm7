@@ -6,7 +6,7 @@
 #   mask_{vision,vlm,expert,visionvlm} → run_eval_masked.sh (BASE=θ0, TUNED=ckpts/<cond>/dart_a0.5)
 # 7개 모두 exp6_cond.sh 의 그 조건 XARM7_COLOR·XARM7_DYNAMICS 를 export 한 셸에서 띄운다 (클라이언트가 상속, 마스크 러너는 COND 로 같은 값).
 # libero_spatial 10 태스크 × 10 에피소드, seed 7 (eval_xarm7.py 기본), 클라이언트 5개. 태그 <cond>_<model>.
-# 이미 100 에피소드가 끝난 태그는 건너뛴다 (잡이 끝나 다시 돌릴 때 이어서). 끝나면 summary 생성 + results/<cond>_* 를 git commit.
+# 이미 100 에피소드가 에러 없이 끝난 태그는 건너뛴다 (잡이 끝나 다시 돌릴 때 이어서). 에러가 있으면 1회 재시도. 끝나면 summary 생성 + results/<cond>_* 를 git commit.
 #   setsid nohup bash -c 'for c in v1 v2 v3; do bash ~/hayeon/dart_xarm7/run_all_eval_cond.sh $c; done' > /dev/null 2>&1 < /dev/null &
 # 진행: $DART_ROOT/eval/status_exp6.txt, 실행 로그 $DART_ROOT/eval/run_exp6_<cond>.log
 set -uo pipefail
@@ -30,8 +30,14 @@ import os, libero_xarm7 as X
 assert (X.COLOR, X.DYNAMICS) == (os.environ['XARM7_COLOR'], os.environ['XARM7_DYNAMICS']), (X.COLOR, X.DYNAMICS)
 print('client env OK', X.COLOR, X.DYNAMICS)" 2>&1 | tail -1 ) | tee -a "$ST" | grep -q "client env OK" || { log "$C: 클라이언트 env 확인 실패 — 중단"; exit 1; }
 
-done_already() { [ "$(cat $H/results/$1/client*.jsonl 2>/dev/null | wc -l)" -eq 100 ] && grep -q "/100" $H/results/$1/summary.txt 2>/dev/null; }
+# 완료 = 100 에피소드 + 에러 0 (2026-10-23 v1_mask_vlm: 서버가 첫 추론에서 수 분 멈춰 클라이언트 연결이 끊기고 100 에피소드 전부 에러 → 완료로 치지 않음)
+done_already() { [ "$(cat $H/results/$1/client*.jsonl 2>/dev/null | wc -l)" -eq 100 ] && grep -q "/100.*errors=0" $H/results/$1/summary.txt 2>/dev/null; }
 
+retry() {  # retry <태그> <함수> <인자…> — 끝났는데 에러가 있으면 한 번만 다시 돌린다
+  local tag=$1; shift
+  "$@"
+  done_already "$tag" || { log "EVAL $tag 에러/미완료 → 1회 재시도"; "$@"; done_already "$tag" || log "EVAL $tag 재시도 후에도 에러/미완료 — 확인 필요"; }
+}
 ev_ckpt() {  # ev_ckpt <model> <config> <dir> — serve_ckpt.py 경로 (run_eval_model.sh)
   local tag=${C}_$1 R=$H/results/${C}_$1
   done_already "$tag" && { log "EVAL $tag 이미 완료 — 건너뜀"; return 0; }
@@ -53,13 +59,13 @@ ev_mask() {  # ev_mask <model> <modules> — serve_masked.py 경로 (run_eval_ma
 }
 
 log "=== stage3 $C 시작 (job $PBS_JOBID, $(hostname), XARM7_COLOR=$XARM7_COLOR XARM7_DYNAMICS=$XARM7_DYNAMICS) ==="
-ev_ckpt theta0 pi05_libero "$T0"
-ev_ckpt theta_tgt pi05_libero_oneshotft "$TGT"
-ev_ckpt dart_a0.5 pi05_libero "$TS"
-ev_mask mask_vision vision
-ev_mask mask_vlm vlm
-ev_mask mask_expert expert
-ev_mask mask_visionvlm vision,vlm
+retry ${C}_theta0 ev_ckpt theta0 pi05_libero "$T0"
+retry ${C}_theta_tgt ev_ckpt theta_tgt pi05_libero_oneshotft "$TGT"
+retry ${C}_dart_a0.5 ev_ckpt dart_a0.5 pi05_libero "$TS"
+retry ${C}_mask_vision ev_mask mask_vision vision
+retry ${C}_mask_vlm ev_mask mask_vlm vlm
+retry ${C}_mask_expert ev_mask mask_expert expert
+retry ${C}_mask_visionvlm ev_mask mask_visionvlm vision,vlm
 
 TAGS="${C}_theta0 ${C}_theta_tgt ${C}_dart_a0.5 ${C}_mask_vision ${C}_mask_vlm ${C}_mask_expert ${C}_mask_visionvlm"
 SUMMARY_JSON=$H/results/${C}_summary.json /usr/bin/python3 $H/summarize_eval.py $TAGS > $H/results/${C}_summary.txt 2>&1

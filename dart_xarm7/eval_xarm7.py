@@ -135,5 +135,5 @@ def main(args: Args) -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")  # 시각: 연결 끊김 시점 진단용
     main(tyro.cli(Args))
