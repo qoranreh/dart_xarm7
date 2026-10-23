@@ -1,0 +1,1 @@
+v2_mask_visionvlm (v2 vision,vlm): 69/100 = 69.0%  held-out 64/90 | t0:5/10 t1:10/10 t2:10/10 t3:10/10 t4:1/10 t5:6/10 t6:10/10 t7:4/10 t8:8/10 t9:5/10 | errors=0

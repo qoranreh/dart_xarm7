@@ -1,0 +1,6 @@
+tag=v2_dart_a0.5
+cond=v2 XARM7_COLOR=white XARM7_DYNAMICS=robosuite
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.130582.ECE-util1/dart/ckpts/v2/dart_a0.5
+suite=libero_spatial tasks=0 1 2 3 4 5 6 7 8 9 trials=10 nclient=5
+job=130582.ECE-util1 host=ece-agpu7 start=2026-10-23 17:51:22
+end=2026-10-23 18:13:13 wall=1311s rc=0

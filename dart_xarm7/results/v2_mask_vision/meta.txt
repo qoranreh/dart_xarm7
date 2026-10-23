@@ -1,0 +1,11 @@
+tag=v2_mask_vision
+cond=v2 XARM7_COLOR=white XARM7_DYNAMICS=robosuite
+base=/var/tmp/pbs.130582.ECE-util1/dart/openpi-cache/openpi-assets/checkpoints/pi05_libero
+tuned=/var/tmp/pbs.130582.ECE-util1/dart/ckpts/v2/dart_a0.5
+modules=vision config=pi05_libero
+suite=libero_spatial tasks=0 1 2 3 4 5 6 7 8 9 trials=10 nclient=5 port=9100
+job=130582.ECE-util1 host=ece-agpu7 start=2026-10-23 18:13:13
+module vision: θ* 0.415B params, θ₀ 0.000B params
+module vlm   : θ* 0.000B params, θ₀ 2.509B params
+module expert: θ* 0.000B params, θ₀ 0.430B params
+end=2026-10-23 18:34:45 wall=1292s client_fail=0
