@@ -1,0 +1,6 @@
+tag=v1_dart_a0.5
+cond=v1 XARM7_COLOR=dark XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.130582.ECE-util1/dart/ckpts/v1/dart_a0.5
+suite=libero_spatial tasks=0 1 2 3 4 5 6 7 8 9 trials=10 nclient=5
+job=130582.ECE-util1 host=ece-agpu7 start=2026-10-23 14:45:36
+end=2026-10-23 15:08:13 wall=1357s rc=0

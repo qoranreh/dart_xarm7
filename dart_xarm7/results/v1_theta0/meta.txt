@@ -1,0 +1,6 @@
+tag=v1_theta0
+cond=v1 XARM7_COLOR=dark XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.130582.ECE-util1/dart/openpi-cache/openpi-assets/checkpoints/pi05_libero
+suite=libero_spatial tasks=0 1 2 3 4 5 6 7 8 9 trials=10 nclient=5
+job=130582.ECE-util1 host=ece-agpu7 start=2026-10-23 13:55:15
+end=2026-10-23 14:18:35 wall=1400s rc=0
