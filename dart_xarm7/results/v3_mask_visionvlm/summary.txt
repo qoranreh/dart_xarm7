@@ -1,0 +1,1 @@
+v3_mask_visionvlm (v3 vision,vlm): 57/100 = 57.0%  held-out 53/90 | t0:4/10 t1:7/10 t2:10/10 t3:10/10 t4:1/10 t5:0/10 t6:10/10 t7:2/10 t8:7/10 t9:6/10 | errors=0
