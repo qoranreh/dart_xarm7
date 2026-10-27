@@ -9,6 +9,8 @@ H1 시각 가설: δ 의 효과가 vision+VLM 에 담김 / H2 액션 가설: act
 | v2 | white | robosuite | 단계 3: 평가 7개 완료 |
 | v3 | dark | robosuite | 단계 3: 평가 7개 완료 |
 
+단계 4 (2026-10-27): v0~v3 집계·가설 대조 → **`EXP6_RESULTS.md`** (노션용 요약 `EXP6_NOTION_SUMMARY.md`).
+
 고정 (모든 조건): libero_spatial task 0 demo_0 데모, Panda init state → xArm7 IK 전이, 카메라, XARM7_INIT_QPOS, seed 7,
 FT (pi05_libero_oneshotft, batch 64, 1000 step), 평가 (10 태스크 × 10 에피소드, t0 = adapt, t1~9 = held-out), α = 0.5, 합성 = 공식 CPU.
 θ_src 는 v0 것을 모든 조건이 공유.
@@ -519,3 +521,34 @@ VLM 만 넣은 경우를 동역학으로 나누면: panda (v0+v1) 120/180 vs θ0
 
 신규·수정 (단계 3): 신규 `run_all_eval_cond.sh`, `video_frames.py` / 수정 `eval_xarm7.py` (로그 첫 줄·jsonl 조건 기록·로그 시각),
 `run_eval_masked.sh` (EVAL_CKPT_INFO), `summarize_eval.py` (SUMMARY_JSON), `summarize_exp6.py` (태스크별 열, θ* vs θ_tgt).
+
+---
+
+## 단계 4 — 2×2 집계와 해석 (2026-10-27, 잡 131055, ece-agpu14) — 새 실행 없음
+
+- 조건: v0~v3 결과를 읽기만 함 (평가·학습·합성 없음 → XARM7_COLOR·XARM7_DYNAMICS 적용 대상 없음). GPU 미사용.
+- 시작 전 사용자 결정 (프롬프트와 다른 두 곳):
+  1. 그림 1 은 회복률 막대 대신 **"마스크 − θ0 (%p) + 95% CI"** 로 그림. 회복률은 표에만 넣음.
+     이유: 분모 θ* − θ0 가 +3~13%p 라 v3 회복률이 500% / −300% 로 나와 그림이 왜곡됨.
+  2. 조건별 칸은 사전 15%p 규칙으로 판정. 결론에는 4조건 합산 CMH 를 **결과를 본 뒤 추가한 사후 분석**이라고 밝히고 함께 씀.
+- 명령: `/usr/bin/python3 ~/hayeon/dart_xarm7/exp6_results.py` (이미지 Python 의 numpy·scipy·matplotlib, 설치 없음, 약 2초). 15:20 시작 → 15:45 문서까지.
+- 검증:
+  - 결과 28세트 모두 held-out 90회, errors 0 (스크립트 assert).
+  - 합산 CMH 값이 3-2 표와 같음.
+  - 그림 팔레트는 dataviz `validate_palette.js` 로 확인 (인접 CVD ΔE 9.1 / 17.6, 모두 PASS).
+- 산출물:
+  - 신규 `exp6_results.py`, `EXP6_RESULTS.md`, `EXP6_NOTION_SUMMARY.md`
+  - `figs/exp6_fig1_mask_minus_theta0.png`, `figs/exp6_fig2_theta0_tgt_star.png` (300dpi)
+  - `results/exp6_master.json`, `results/exp6_master_tables.md`
+  - `README.md` 에 링크 추가
+- 결과 요지 (상세는 EXP6_RESULTS.md):
+  - 사전 규칙으로는 예측 6칸 모두 "?" 다. 색·동역학 손잡이가 θ0 를 15%p 이상 바꾸지 못함 (v1 −4.4, v2 −1.1, v3 −7.8%p).
+  - 조건별로 15%p 를 넘은 것은 vision 만 (v0·v2·v3) 과 v0 vision+VLM 뿐이다.
+  - 사후 합산에서는 vision 만 +14.7%p (p=6e-5), expert 만은 θ* 대비 −13.3%p (p=4e-4) → H1 의 vision 쪽만 지지, H2 지지 안 됨.
+  - 교란 (a) 해당 없음, (b) 해당 (색·동역학 손잡이 모두 약함), (c) 판정 불가.
+- 이상 징후: 없음.
+  - 컨테이너에서는 ssh 가 `No user exists for uid 4001` 로 실패하고, GitHub HTTPS 자격 증명도 없어 push 는 로그인 노드에서 함.
+  - 실험 6 평가 영상 (v1~v3·마스크) 은 잡 130582 의 /dev/shm 에만 있었고 홈에는 없음. 홈에는 같은 가중치 v0 의 10-10 실행 영상 (`results/videos/`) 과 실패 프레임 (`renders/exp6_eval/`) 만 있음.
+- 환경 상태 메모: 홈 27,809 MiB (쿼터 ≈28GiB 추정). HF 체크포인트 11폴더 확인 (10-27).
+  agpu7 의 `/dev/shm/introai34_dart_130582` (77G) 정리 여부는 확인하지 못함.
+
