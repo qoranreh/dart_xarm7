@@ -1,0 +1,1 @@
+exp7pilot_theta0_cam_azim_30: 21/50 = 42% errors=0

@@ -1,0 +1,4 @@
+tag=exp7pilot_theta0_cam_dist_1.2
+perturb=cam_dist level=1.2 tasks=0 1 2 3 4 5 6 7 8 9 init=20..24 nclient=5
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.131055.ECE-util1/dart/openpi-cache/openpi-assets/checkpoints/pi05_libero
+job=131055.ECE-util1 host=ece-agpu14 end=2026-10-27 17:00:57 wall=566s attempt=1

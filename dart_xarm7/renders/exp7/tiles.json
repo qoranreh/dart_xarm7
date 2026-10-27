@@ -1,0 +1,515 @@
+[
+ {
+  "task_id": 0,
+  "episode": 20,
+  "perturb": "none",
+  "level": 0.0,
+  "stem": "t0_ep20_none_0",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "pinfo": {}
+ },
+ {
+  "task_id": 0,
+  "episode": 20,
+  "perturb": "cam_dist",
+  "level": 1.2,
+  "stem": "t0_ep20_cam_dist_1.2",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.8345,
+    0.0,
+    1.7524
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.3568,
+   "sign": -1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 0,
+  "episode": 20,
+  "perturb": "cam_dist",
+  "level": 1.5,
+  "stem": "t0_ep20_cam_dist_1.5",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    1.0984,
+    0.0,
+    1.9655
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.696,
+   "sign": -1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 0,
+  "episode": 20,
+  "perturb": "cam_azim",
+  "level": 15.0,
+  "stem": "t0_ep20_cam_azim_15",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.6286,
+    -0.2277,
+    1.6104
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.1307,
+   "sign": -1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 0,
+  "episode": 20,
+  "perturb": "cam_azim",
+  "level": 30.0,
+  "stem": "t0_ep20_cam_azim_30",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.5408,
+    -0.4398,
+    1.6104
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.1307,
+   "sign": -1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 0,
+  "episode": 20,
+  "perturb": "joint",
+  "level": 0.1,
+  "stem": "t0_ep20_joint_0.1",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "pinfo": {
+   "dq": [
+    0.0219,
+    -0.05012,
+    -0.02271,
+    0.06682,
+    -0.0048,
+    0.00121,
+    -0.04476
+   ],
+   "dq_norm": 0.1,
+   "tries": 1,
+   "eef_shift_cm": 5.41,
+   "eef_rot_deg": 7.18
+  }
+ },
+ {
+  "task_id": 0,
+  "episode": 20,
+  "perturb": "joint",
+  "level": 0.2,
+  "stem": "t0_ep20_joint_0.2",
+  "task": "pick up the black bowl between the plate and the ramekin and place it on the plate",
+  "pinfo": {
+   "dq": [
+    0.04379,
+    -0.10024,
+    -0.04542,
+    0.13363,
+    -0.0096,
+    0.00243,
+    -0.08953
+   ],
+   "dq_norm": 0.2,
+   "tries": 1,
+   "eef_shift_cm": 10.89,
+   "eef_rot_deg": 14.34
+  }
+ },
+ {
+  "task_id": 4,
+  "episode": 20,
+  "perturb": "none",
+  "level": 0.0,
+  "stem": "t4_ep20_none_0",
+  "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "pinfo": {}
+ },
+ {
+  "task_id": 4,
+  "episode": 20,
+  "perturb": "cam_dist",
+  "level": 1.2,
+  "stem": "t4_ep20_cam_dist_1.2",
+  "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.8345,
+    0.0,
+    1.7524
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.3568,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 4,
+  "episode": 20,
+  "perturb": "cam_dist",
+  "level": 1.5,
+  "stem": "t4_ep20_cam_dist_1.5",
+  "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    1.0984,
+    0.0,
+    1.9655
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.696,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 4,
+  "episode": 20,
+  "perturb": "cam_azim",
+  "level": 15.0,
+  "stem": "t4_ep20_cam_azim_15",
+  "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.6286,
+    0.2277,
+    1.6104
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.1307,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 4,
+  "episode": 20,
+  "perturb": "cam_azim",
+  "level": 30.0,
+  "stem": "t4_ep20_cam_azim_30",
+  "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.5408,
+    0.4398,
+    1.6104
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.1307,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 4,
+  "episode": 20,
+  "perturb": "joint",
+  "level": 0.1,
+  "stem": "t4_ep20_joint_0.1",
+  "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "pinfo": {
+   "dq": [
+    -0.07196,
+    -0.01819,
+    -0.03194,
+    -0.04152,
+    0.02618,
+    0.02682,
+    0.01849
+   ],
+   "dq_norm": 0.1,
+   "tries": 1,
+   "eef_shift_cm": 4.57,
+   "eef_rot_deg": 8.29
+  }
+ },
+ {
+  "task_id": 4,
+  "episode": 20,
+  "perturb": "joint",
+  "level": 0.2,
+  "stem": "t4_ep20_joint_0.2",
+  "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+  "pinfo": {
+   "dq": [
+    -0.14392,
+    -0.03638,
+    -0.06389,
+    -0.08304,
+    0.05235,
+    0.05365,
+    0.03697
+   ],
+   "dq_norm": 0.2,
+   "tries": 1,
+   "eef_shift_cm": 8.91,
+   "eef_rot_deg": 16.58
+  }
+ },
+ {
+  "task_id": 7,
+  "episode": 20,
+  "perturb": "none",
+  "level": 0.0,
+  "stem": "t7_ep20_none_0",
+  "task": "pick up the black bowl on the stove and place it on the plate",
+  "pinfo": {}
+ },
+ {
+  "task_id": 7,
+  "episode": 20,
+  "perturb": "cam_dist",
+  "level": 1.2,
+  "stem": "t7_ep20_cam_dist_1.2",
+  "task": "pick up the black bowl on the stove and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.8345,
+    0.0,
+    1.7524
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.3568,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 7,
+  "episode": 20,
+  "perturb": "cam_dist",
+  "level": 1.5,
+  "stem": "t7_ep20_cam_dist_1.5",
+  "task": "pick up the black bowl on the stove and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    1.0984,
+    0.0,
+    1.9655
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.696,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 7,
+  "episode": 20,
+  "perturb": "cam_azim",
+  "level": 15.0,
+  "stem": "t7_ep20_cam_azim_15",
+  "task": "pick up the black bowl on the stove and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.6286,
+    0.2277,
+    1.6104
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.1307,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 7,
+  "episode": 20,
+  "perturb": "cam_azim",
+  "level": 30.0,
+  "stem": "t7_ep20_cam_azim_30",
+  "task": "pick up the black bowl on the stove and place it on the plate",
+  "pinfo": {
+   "cam_pos0": [
+    0.6586,
+    0.0,
+    1.6104
+   ],
+   "cam_pos": [
+    0.5408,
+    0.4398,
+    1.6104
+   ],
+   "center": [
+    -0.221,
+    -0.0,
+    0.9
+   ],
+   "dist0": 1.1307,
+   "dist": 1.1307,
+   "sign": 1,
+   "table": "table_collision table"
+  }
+ },
+ {
+  "task_id": 7,
+  "episode": 20,
+  "perturb": "joint",
+  "level": 0.1,
+  "stem": "t7_ep20_joint_0.1",
+  "task": "pick up the black bowl on the stove and place it on the plate",
+  "pinfo": {
+   "dq": [
+    -0.07372,
+    0.02521,
+    0.00568,
+    0.045,
+    -0.01089,
+    -0.00503,
+    -0.04157
+   ],
+   "dq_norm": 0.1,
+   "tries": 1,
+   "eef_shift_cm": 3.63,
+   "eef_rot_deg": 1.94
+  }
+ },
+ {
+  "task_id": 7,
+  "episode": 20,
+  "perturb": "joint",
+  "level": 0.2,
+  "stem": "t7_ep20_joint_0.2",
+  "task": "pick up the black bowl on the stove and place it on the plate",
+  "pinfo": {
+   "dq": [
+    -0.14745,
+    0.05042,
+    0.01135,
+    0.09,
+    -0.02178,
+    -0.01006,
+    -0.08314
+   ],
+   "dq_norm": 0.2,
+   "tries": 1,
+   "eef_shift_cm": 7.33,
+   "eef_rot_deg": 3.87
+  }
+ }
+]

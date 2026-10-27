@@ -1,0 +1,1 @@
+exp7pilot_theta0_cam_dist_1.5: 16/50 = 32% errors=0

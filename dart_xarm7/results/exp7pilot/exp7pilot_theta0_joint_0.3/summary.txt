@@ -1,0 +1,1 @@
+exp7pilot_theta0_joint_0.3: 22/50 = 44% errors=0
