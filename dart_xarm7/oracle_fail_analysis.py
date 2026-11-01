@@ -4,10 +4,13 @@
 - 기록 (매 스텝 뒤): 그릇 위치·기울기(그릇 z축과 월드 z 사이 각), 양쪽 패드가 그릇에 닿음(_check_grasp), 그리퍼-그릇 접촉,
   그릇-접시 xy 거리 (성공 술어 On = 접시와 접촉 + xy < 3cm), grip_site-그릇 거리·높이차,
   그리퍼·팔이 닿은 다른 물체 이름 (예: t4 의 wooden_cabinet_1). 스텝별 배열은 <name>_replay.npz.
-- 재생이 원래 실행과 같은지: 매 스텝 전 eef_pos 를 npz 와 비교 (eef_replay_max_diff_m).
+- 그릇 말고 2cm 넘게 움직인 물체 (moved_objects_cm, 예: t5 에서 그릇과 같이 들린 램킨), 추가 대기 뒤 그릇이 닿아 있는 상대 (after_extra_wait.bowl_contacts).
+- 재생 액션 = 원래 실행과 같은 float64 값: Panda 는 hdf5 원본 액션, xArm7 은 npz 의 pos_raw·rot_raw (자르기 전) 를 같은 규칙으로 다시 잘라 복원
+  (npz 의 actions 는 float32 라 그대로 넣으면 접촉에서 궤적이 벌어짐). 매 스텝 전 eef_pos 를 npz 와 비교 (eef_replay_max_diff_m).
 - 액션이 끝난 뒤 --extra 스텝 더 기다려(그리퍼 열림) 늦게 성공하는지도 본다 (표의 성공 수에는 반영 안 함).
 출력 (--out, 기본 results/oracle_t45/fail/): <name>.json (사건·튀는 스텝·유형 제안), <name>_strip.png (위 Panda / 아래 xArm7 같은 스텝),
-<name>_ts.png (시계열), <name>_replay.npz, 영상은 results/oracle_t45/videos/<name>.mp4 ([agentview | 손목], 10fps, git 제외).
+<name>_ts.png (시계열), <name>_replay.npz, 영상은 results/oracle_t45/videos/<name>.mp4 ([agentview | 손목], 10fps, git 제외)
+와 <name>_cmp.mp4 ([Panda agentview | xArm7 agentview], 같은 스텝, 10fps).
 
   $LIBERO_PY ~/hayeon/dart_xarm7/oracle_fail_analysis.py --task 4 --demo 0 --variant quantile
 """
@@ -39,11 +42,13 @@ p.add_argument("--plate", default="plate_1")
 p.add_argument("--wait", type=int, default=10)
 p.add_argument("--extra", type=int, default=20)
 p.add_argument("--out", default=os.path.expanduser("~/hayeon/dart_xarm7/results/oracle_t45/fail"))
+p.add_argument("--src-root", default=os.path.expandvars("$DART_ROOT/demos"),
+               help="retarget·Panda npz 가 있는 루트 (예: $DART_ROOT/demos/oracle_rep/omp1_a). OMP_NUM_THREADS=1 실행이면 재생이 비트 단위로 같음")
 args = p.parse_args()
 
 DUMMY = [0.0] * 6 + [-1.0]
 tag = f"{args.suite}_t{args.task}_demo_{args.demo}"
-folder = pathlib.Path(os.path.expandvars(f"$DART_ROOT/demos/oracle_t{args.task}/demo{args.demo}"))
+folder = pathlib.Path(args.src_root) / f"oracle_t{args.task}" / f"demo{args.demo}"
 suffix = "XArm7_retarget_rotq" if args.variant == "quantile" else "XArm7_retarget"
 name = f"t{args.task}_demo{args.demo}_{args.variant}"
 OUT = pathlib.Path(args.out)
@@ -52,7 +57,15 @@ OUT.mkdir(parents=True, exist_ok=True)
 VID.mkdir(parents=True, exist_ok=True)
 Z = np.load(folder / f"{tag}_{suffix}.npz")
 PZ = np.load(folder / f"{tag}_Panda.npz")
-state0 = np.load(os.path.expandvars(f"$DART_ROOT/demos/{args.suite.removeprefix('libero_')}_t{args.task}_hdf5_demo0-4.npz"))[f"demo_{args.demo}/states"][0]
+H = np.load(os.path.expandvars(f"$DART_ROOT/demos/{args.suite.removeprefix('libero_')}_t{args.task}_hdf5_demo{args.demo // 5 * 5}-{args.demo // 5 * 5 + 4}.npz"))
+state0 = H[f"demo_{args.demo}/states"][0]
+src64 = H[f"demo_{args.demo}/actions"].astype(np.float64)  # make_demo_pair / make_retarget_demo 가 쓴 Panda 액션 그대로
+NS = json.load(open(os.path.expandvars("$OPENPI_DATA_HOME/openpi-assets/checkpoints/pi05_libero/assets/physical-intelligence/libero/norm_stats.json")))["norm_stats"]["actions"]
+drot = np.clip(Z["rot_raw"], -1, 1)
+if args.variant == "quantile":
+    drot = np.clip(drot, np.array(NS["q01"][3:6]), np.array(NS["q99"][3:6]))
+xarm64 = np.concatenate([np.clip(Z["pos_raw"], -1, 1), drot, src64[:, 6:7]], 1)  # make_retarget_demo.py 의 액션 식
+assert np.array_equal(xarm64.astype(np.float32), Z["actions"]) and np.array_equal(src64.astype(np.float32), PZ["actions"])
 task = benchmark.get_benchmark_dict()[args.suite]().get_task(args.task)
 bddl = str(pathlib.Path(get_libero_path("bddl_files")) / task.problem_folder / task.bddl_file)
 
@@ -76,7 +89,15 @@ def owner_map(e):
 
 
 def contacts(e, model, owners, skip):
-    return sorted({owners.get(g, "other") for g in e.get_contacts(model)} - {skip})
+    """접촉 상대 이름. 물체·고정물이 아니면 몸체 이름으로 gripper_body (패드 외 그리퍼) / arm 으로 묶음."""
+    m, out = e.sim.model, set()
+    for g in e.get_contacts(model):
+        if g in owners:
+            out.add(owners[g])
+            continue
+        b = m.body_id2name(m.geom_bodyid[m.geom_name2id(g)]) if g else ""
+        out.add("gripper_body" if b.startswith("gripper0") else "arm" if b.startswith(("robot0", "mount0")) else b or "unnamed")
+    return sorted(out - set(skip))
 
 
 def probe(env):
@@ -92,7 +113,7 @@ def probe(env):
             "grasp": bool(e._check_grasp(gripper=rb.gripper, object_geoms=bowl)), "touch": bool(e.check_contact(rb.gripper, bowl)),
             "bowl_plate_xy": float(np.linalg.norm(bp[:2] - pp[:2])), "bowl_plate_contact": bool(e.check_contact(bowl, plate)),
             "grip_bowl_dist": float(np.linalg.norm(grip - bp)), "grip_minus_bowl_z": float(grip[2] - bp[2]),
-            "grip_other": contacts(e, rb.gripper, owners, args.obj), "arm_other": contacts(e, rb.robot_model, owners, None),
+            "grip_other": contacts(e, rb.gripper, owners, (args.obj, "gripper_body")), "arm_other": contacts(e, rb.robot_model, owners, ("arm", "gripper_body")),
             "success": bool(e._check_success())}
 
 
@@ -109,10 +130,16 @@ def run(robot, actions, eef_ref):
         obs, _, _, _ = env.step(DUMMY)
     rec, eef_diff = [], 0.0
     p0 = probe(env)
+    e = env.env
+    others = [n for n in e.objects_dict if n != args.obj]
+    pos0 = {n: e.sim.data.body_xpos[e.obj_body_id[n]].copy() for n in others}
+    moved = dict.fromkeys(others, 0.0)
     for t, a in enumerate(actions):
         eef_diff = max(eef_diff, float(np.abs(obs["robot0_eef_pos"] - eef_ref[t]).max()))
         obs, _, _, _ = env.step(a)
         rec.append(probe(env))
+        for n in others:
+            moved[n] = max(moved[n], float(np.linalg.norm(e.sim.data.body_xpos[e.obj_body_id[n]] - pos0[n])))
     extra_success = None
     for k in range(args.extra):
         obs, _, _, _ = env.step(DUMMY)
@@ -120,12 +147,13 @@ def run(robot, actions, eef_ref):
             extra_success = k + 1
             break
     after = probe(env)  # 추가 대기 뒤 (그리퍼 열림) 상태
+    after["bowl_contacts"] = contacts(e, e.get_object(args.obj), owner_map(e), (args.obj,))
     env.close()
     out = {k: np.array([r[k] for r in rec]) for k in rec[0] if k not in ("grip_other", "arm_other")}
     out["grip_other"] = [r["grip_other"] for r in rec]
     out["arm_other"] = [r["arm_other"] for r in rec]
     after = {k: (v.tolist() if isinstance(v, np.ndarray) else v) for k, v in after.items()}
-    return p0, out, eef_diff, extra_success, after
+    return p0, out, eef_diff, extra_success, after, {n: round(v * 100, 1) for n, v in moved.items() if v > 0.02}
 
 
 def events(p0, r, actions):
@@ -153,23 +181,39 @@ def events(p0, r, actions):
     return e
 
 
-def suggest(e, ep):
-    """유형 제안 (최종 판정은 프레임 띠를 보고 로그에 적음). 순서: 접근 → 파지 → 들기 → 놓기 중 처음 어긋난 곳.
-    파지 성립 = 양 패드 접촉 ≥ 10스텝 이고 그릇이 3cm 이상 들림. 기운 채 = 접촉 중 그릇 기울기 > max(Panda + 10°, 30°)."""
-    if e["first_grasp_step"] is None:
-        return "접근" if (e["grip_bowl_dist_at_close_cm"] or 99) > 8 else "파지(빈손으로 닫힘)"
+def suggest(e, ep, moved_x, moved_p):
+    """(유형, 원인 태그). 최종 판정은 프레임을 보고 로그에 적음. 순서: 접근 → 파지 → 들기 → 놓기 중 처음 어긋난 곳.
+    - 도중에 성공 판정이 났으면 놓기 (성공 후 놓침)
+    - 접시 근처(8cm)까지 못 가져감: 접촉 중 그릇 기울기 > max(Panda + 10°, 30°) 면 파지(기운 채 잡힘),
+      양 패드 접촉 < 10스텝 이면 파지(빈손으로 닫힘), 그 밖 (쥐었는데 3cm 못 들었거나 옮기다 놓침) 은 들기
+    - 가져갔는데 실패 = 놓기"""
+    tags = []
+    if not ep["success_end"]:
+        tags.append("Panda 도 실패 (비교 제외)")
+    carried = sorted(n for n, v in moved_x.items() if v > 10 and n != args.plate and moved_p.get(n, 0) < 5)
+    if carried:
+        tags.append("같이 옮겨짐: " + ", ".join(carried))
     tilted = (e["bowl_tilt_max_while_grasp_deg"] or 0) > max((ep["bowl_tilt_max_while_grasp_deg"] or 0) + 10, 30)
+    if e["first_success_step"] is not None:
+        return "놓기", tags + [f"성공 후 놓침 (첫 성공 {e['first_success_step']})"]
+    if e["first_grasp_step"] is None:
+        return ("접근" if (e["grip_bowl_dist_at_close_cm"] or 99) > 8 else "파지(빈손으로 닫힘)"), tags
+    delivered = e["grasp_steps"] >= 10 and e["bowl_lift_max_cm"] >= 3 and e.get("bowl_plate_xy_at_last_grasp_cm", 99) <= 8
+    if not delivered:
+        if tilted:
+            return "파지(기운 채 잡힘)", tags
+        if e["grasp_steps"] < 10:
+            return "파지(빈손으로 닫힘)", tags
+        return "들기", tags + (["못 들어 올림"] if e["bowl_lift_max_cm"] < 3 else ["옮기다 놓침"])
+    if e["final_bowl_plate_contact"] and e["final_bowl_plate_xy_cm"] >= 3:
+        tags.append(f"접시 중심 {e['final_bowl_plate_xy_cm']:.1f}cm (3cm 밖)")
     if tilted:
-        return "파지(기운 채 잡힘)"
-    if e["grasp_steps"] < 10 or e["bowl_lift_max_cm"] < 3:
-        return "파지(빈손으로 닫힘)"
-    if e.get("bowl_plate_xy_at_last_grasp_cm", 99) > 8:
-        return "들기"
-    return "놓기"
+        tags.append("기운 채 운반")
+    return "놓기", tags
 
 
-pz0, pr, p_eef, p_extra, p_after = run("Panda", PZ["actions"].astype(np.float64), PZ["eef_pos"])
-xz0, xr, x_eef, x_extra, x_after = run("XArm7", Z["actions"].astype(np.float64), Z["eef_pos"])
+pz0, pr, p_eef, p_extra, p_after, p_moved = run("Panda", src64, PZ["eef_pos"])
+xz0, xr, x_eef, x_extra, x_after, x_moved = run("XArm7", xarm64, Z["eef_pos"])
 src_actions = PZ["actions"]
 ev = {"Panda": events(pz0, pr, src_actions), "XArm7": events(xz0, xr, src_actions)}
 
@@ -191,11 +235,13 @@ spikes = {"pad_gap_jumps_step_mm": gap_jumps, "track_err_pos_spike_steps": spk(t
           "pad_gap_hold_median_mm": {"XArm7": float(np.median(gap[cmd > 0]) * 1000) if (cmd > 0).any() else None,
                                      "Panda": float(np.median(PZ["pad_gap"][cmd > 0]) * 1000) if (cmd > 0).any() else None},
           "pad_gap_min_mm": {"XArm7": float(gap.min() * 1000), "Panda": float(PZ["pad_gap"].min() * 1000)}}
-res = {"name": name, "task": task.language, "variant": args.variant, "env_meta": str(Z["env_meta"]),
+res = {"name": name, "task": task.language, "variant": args.variant, "env_meta": str(Z["env_meta"]), "src_root": str(args.src_root),
+       "omp_num_threads": os.environ.get("OMP_NUM_THREADS"),
        "eef_replay_max_diff_m": {"Panda": p_eef, "XArm7": x_eef},
        "replay_success_matches_summary": None, "success_after_extra_wait": {"Panda": p_extra, "XArm7": x_extra},
-       "after_extra_wait": {"Panda": p_after, "XArm7": x_after},
-       "events": ev, "spikes": spikes, "suggested_failure_point": suggest(ev["XArm7"], ev["Panda"])}
+       "after_extra_wait": {"Panda": p_after, "XArm7": x_after}, "moved_objects_cm": {"Panda": p_moved, "XArm7": x_moved},
+       "events": ev, "spikes": spikes}
+res["suggested_failure_point"], res["cause_tags"] = suggest(ev["XArm7"], ev["Panda"], x_moved, p_moved)
 S = json.loads((folder / f"{tag}_{suffix}_summary.json").read_text())
 res["replay_success_matches_summary"] = ev["XArm7"]["success_end"] == S["xarm_success_at_end"]
 (OUT / f"{name}.json").write_text(json.dumps(res, indent=1, ensure_ascii=False))
@@ -210,8 +256,22 @@ for t in range(len(Z["actions"])):
     d.text((4, 2), f"{name} t={t} cmd={'close' if cmd[t] > 0 else 'open'}", fill=(255, 255, 0))
     d.text((4, 14), f"gap {gap[t] * 1000:.1f}mm  err {tp[t] * 100:.1f}cm {np.degrees(tr[t]):.1f}deg  grasp={int(xr['grasp'][t])}", fill=(255, 255, 0))
     frames.append(np.asarray(im))
-if not (VID / f"{name}.mp4").exists():  # 재생이 결정적이라 내용이 같음 — 재생 중인 파일을 덮지 않음
-    imageio.mimsave(VID / f"{name}.mp4", frames, fps=10)
+def save_mp4(path, fr):  # 임시 파일에 쓴 뒤 이름 바꾸기 — 재생 중인 플레이어는 이전 파일을 계속 읽음
+    tmp = path.with_name(path.stem + ".tmp.mp4")
+    imageio.mimsave(tmp, fr, fps=10)
+    os.replace(tmp, path)
+
+
+save_mp4(VID / f"{name}.mp4", frames)
+cmp_frames = []
+for t in range(len(Z["actions"])):
+    im = Image.fromarray(np.concatenate([PZ["image"][t], Z["image"][t]], 1))
+    d = ImageDraw.Draw(im)
+    d.text((4, 2), f"Panda  t={t}  grasp={int(pr['grasp'][t])}", fill=(255, 255, 0))
+    d.text((260, 2), f"xArm7 {args.variant}  t={t}  grasp={int(xr['grasp'][t])}", fill=(255, 255, 0))
+    d.text((260, 14), f"gap {gap[t] * 1000:.1f}mm  err {tp[t] * 100:.1f}cm {np.degrees(tr[t]):.1f}deg", fill=(255, 255, 0))
+    cmp_frames.append(np.asarray(im))
+save_mp4(VID / f"{name}_cmp.mp4", cmp_frames)
 
 # 프레임 띠: 위 Panda, 아래 xArm7 (같은 스텝). 고르게 6칸 + 사건 스텝
 ex = ev["XArm7"]
@@ -250,7 +310,8 @@ ax[3].set_xlabel("step")
 for a in ax:
     a.legend(fontsize=7, loc="upper right")
     a.grid(alpha=0.3)
-fig.suptitle(f"{name}  suggested: {res['suggested_failure_point']}")
+EN = {"접근": "approach", "파지(빈손으로 닫힘)": "grasp: closed empty", "파지(기운 채 잡힘)": "grasp: tilted", "들기": "lift", "놓기": "place"}
+fig.suptitle(f"{name}  suggested: {EN[res['suggested_failure_point']]}")  # matplotlib 기본 글꼴에 한글이 없음
 fig.tight_layout()
 fig.savefig(OUT / f"{name}_ts.png", dpi=80)
 print(json.dumps({k: res[k] for k in ("name", "eef_replay_max_diff_m", "replay_success_matches_summary", "success_after_extra_wait", "suggested_failure_point")}, ensure_ascii=False))

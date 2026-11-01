@@ -36,7 +36,7 @@ tag = f"{args.suite}_t{args.task}_demo_{args.demo}"
 folder = pathlib.Path(os.path.expandvars(f"$DART_ROOT/demos/oracle_t{args.task}/demo{args.demo}"))
 suffix = "Panda" if args.robot == "Panda" else ("XArm7_retarget_rotq" if args.variant == "quantile" else "XArm7_retarget")
 actions = np.load(folder / f"{tag}_{suffix}.npz")["actions"].astype(np.float64)
-state0 = np.load(os.path.expandvars(f"$DART_ROOT/demos/{args.suite.removeprefix('libero_')}_t{args.task}_hdf5_demo0-4.npz"))[f"demo_{args.demo}/states"][0]
+state0 = np.load(os.path.expandvars(f"$DART_ROOT/demos/{args.suite.removeprefix('libero_')}_t{args.task}_hdf5_demo{args.demo // 5 * 5}-{args.demo // 5 * 5 + 4}.npz"))[f"demo_{args.demo}/states"][0]
 task = benchmark.get_benchmark_dict()[args.suite]().get_task(args.task)
 bddl = str(pathlib.Path(get_libero_path("bddl_files")) / task.problem_folder / task.bddl_file)
 

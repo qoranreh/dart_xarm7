@@ -1,0 +1,173 @@
+{
+ "name": "t4_demo7_none",
+ "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+ "variant": "none",
+ "env_meta": "XARM7_COLOR=white, XARM7_DYNAMICS=panda",
+ "src_root": "/home/qoranreh/dart_laptop/demos/oracle_rep/omp1_a",
+ "omp_num_threads": "1",
+ "eef_replay_max_diff_m": {
+  "Panda": 0.0,
+  "XArm7": 0.0
+ },
+ "replay_success_matches_summary": true,
+ "success_after_extra_wait": {
+  "Panda": 1,
+  "XArm7": null
+ },
+ "after_extra_wait": {
+  "Panda": {
+   "bowl_pos": [
+    0.03867133656614994,
+    0.18953178802037302,
+    0.9066609694160038
+   ],
+   "bowl_tilt_deg": 1.122983195693947,
+   "grasp": false,
+   "touch": false,
+   "bowl_plate_xy": 0.011779531833542403,
+   "bowl_plate_contact": true,
+   "grip_bowl_dist": 0.09115623683390452,
+   "grip_minus_bowl_z": 0.05285024874838273,
+   "grip_other": [],
+   "arm_other": [],
+   "success": true,
+   "bowl_contacts": [
+    "plate_1"
+   ]
+  },
+  "XArm7": {
+   "bowl_pos": [
+    -0.012667224584227818,
+    0.16452693018706183,
+    0.9231464890138907
+   ],
+   "bowl_tilt_deg": 48.24582420646371,
+   "grasp": false,
+   "touch": true,
+   "bowl_plate_xy": 0.05769330080427066,
+   "bowl_plate_contact": true,
+   "grip_bowl_dist": 0.07048279575540822,
+   "grip_minus_bowl_z": -0.0033392988635833065,
+   "grip_other": [],
+   "arm_other": [],
+   "success": false,
+   "bowl_contacts": [
+    "gripper_body",
+    "plate_1",
+    "table"
+   ]
+  }
+ },
+ "moved_objects_cm": {
+  "Panda": {},
+  "XArm7": {}
+ },
+ "events": {
+  "Panda": {
+   "close_cmd_step": 54,
+   "first_grasp_step": 64,
+   "last_grasp_step": 143,
+   "grasp_steps": 80,
+   "first_touch_step": 62,
+   "grip_bowl_dist_at_close_cm": 6.569163247216377,
+   "grip_minus_bowl_z_at_close_cm": 3.2259340461366692,
+   "grip_contacts_close_window": [
+    "wooden_cabinet_1"
+   ],
+   "arm_contacts_all": [],
+   "final_touch": false,
+   "bowl_lift_max_cm": 14.48045202231576,
+   "bowl_lift_argmax": 88,
+   "bowl_tilt_max_while_grasp_deg": 10.699106937617643,
+   "bowl_tilt_max_deg": 10.699106937617643,
+   "final_bowl_plate_xy_cm": 1.1779537503381143,
+   "final_bowl_plate_contact": true,
+   "final_bowl_tilt_deg": 1.1229836530225294,
+   "final_bowl_dz_cm": -15.589899790797123,
+   "min_bowl_plate_xy_cm": 0.3829680586619862,
+   "success_end": true,
+   "first_success_step": 129,
+   "bowl_plate_xy_at_last_grasp_cm": 1.0020203782040489
+  },
+  "XArm7": {
+   "close_cmd_step": 54,
+   "first_grasp_step": 62,
+   "last_grasp_step": 147,
+   "grasp_steps": 86,
+   "first_touch_step": 38,
+   "grip_bowl_dist_at_close_cm": 5.0695699203883695,
+   "grip_minus_bowl_z_at_close_cm": 2.210996364570983,
+   "grip_contacts_close_window": [],
+   "arm_contacts_all": [],
+   "final_touch": true,
+   "bowl_lift_max_cm": 8.113543481831753,
+   "bowl_lift_argmax": 89,
+   "bowl_tilt_max_while_grasp_deg": 25.56770190851617,
+   "bowl_tilt_max_deg": 42.54027782740245,
+   "final_bowl_plate_xy_cm": 3.5677372554024265,
+   "final_bowl_plate_contact": false,
+   "final_bowl_tilt_deg": 40.40793904844837,
+   "final_bowl_dz_cm": -13.637128387009723,
+   "min_bowl_plate_xy_cm": 2.6043225435551705,
+   "success_end": false,
+   "first_success_step": 149,
+   "bowl_plate_xy_at_last_grasp_cm": 3.0236074289334622
+  }
+ },
+ "spikes": {
+  "pad_gap_jumps_step_mm": [],
+  "track_err_pos_spike_steps": [
+   73,
+   74,
+   75,
+   76,
+   77,
+   78,
+   79,
+   80,
+   81,
+   82
+  ],
+  "track_err_rot_spike_steps": [],
+  "track_err_pos_top3": [
+   [
+    76,
+    10.7
+   ],
+   [
+    77,
+    10.6
+   ],
+   [
+    75,
+    10.5
+   ]
+  ],
+  "track_err_rot_top3": [
+   [
+    43,
+    14.8
+   ],
+   [
+    42,
+    14.8
+   ],
+   [
+    143,
+    14.8
+   ]
+  ],
+  "pad_gap_hold_median_mm": {
+   "XArm7": 6.0941561881700315,
+   "Panda": 3.2525708435633316
+  },
+  "pad_gap_min_mm": {
+   "XArm7": 5.112791261012267,
+   "Panda": 3.1510040232525895
+  }
+ },
+ "suggested_failure_point": "놓기",
+ "cause_tags": [
+  "성공 후 놓침 (첫 성공 149)"
+ ]
+}

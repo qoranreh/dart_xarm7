@@ -1,0 +1,179 @@
+{
+ "name": "t5_demo9_quantile",
+ "task": "pick up the black bowl on the ramekin and place it on the plate",
+ "variant": "quantile",
+ "env_meta": "XARM7_COLOR=white, XARM7_DYNAMICS=panda",
+ "src_root": "/home/qoranreh/dart_laptop/demos/oracle_rep/omp1_a",
+ "omp_num_threads": "1",
+ "eef_replay_max_diff_m": {
+  "Panda": 0.0,
+  "XArm7": 0.0
+ },
+ "replay_success_matches_summary": true,
+ "success_after_extra_wait": {
+  "Panda": 1,
+  "XArm7": null
+ },
+ "after_extra_wait": {
+  "Panda": {
+   "bowl_pos": [
+    0.07286227037153495,
+    0.19889973527586594,
+    0.9065576034359876
+   ],
+   "bowl_tilt_deg": 0.39787220508292753,
+   "grasp": false,
+   "touch": false,
+   "bowl_plate_xy": 0.009791280085149191,
+   "bowl_plate_contact": true,
+   "grip_bowl_dist": 0.1197661969003619,
+   "grip_minus_bowl_z": 0.11419226758320111,
+   "grip_other": [],
+   "arm_other": [],
+   "success": true,
+   "bowl_contacts": [
+    "plate_1"
+   ]
+  },
+  "XArm7": {
+   "bowl_pos": [
+    0.05599948377561685,
+    0.18966825300054913,
+    0.9427526038006134
+   ],
+   "bowl_tilt_deg": 7.38726306125515,
+   "grasp": false,
+   "touch": false,
+   "bowl_plate_xy": 0.010827501818277317,
+   "bowl_plate_contact": false,
+   "grip_bowl_dist": 0.08925676345455587,
+   "grip_minus_bowl_z": 0.08653647317865365,
+   "grip_other": [],
+   "arm_other": [],
+   "success": false,
+   "bowl_contacts": [
+    "glazed_rim_porcelain_ramekin_1"
+   ]
+  }
+ },
+ "moved_objects_cm": {
+  "Panda": {},
+  "XArm7": {
+   "glazed_rim_porcelain_ramekin_1": 27.7
+  }
+ },
+ "events": {
+  "Panda": {
+   "close_cmd_step": 38,
+   "first_grasp_step": 60,
+   "last_grasp_step": 93,
+   "grasp_steps": 34,
+   "first_touch_step": 37,
+   "grip_bowl_dist_at_close_cm": 5.9090249568481035,
+   "grip_minus_bowl_z_at_close_cm": 0.8630075338183385,
+   "grip_contacts_close_window": [],
+   "arm_contacts_all": [],
+   "final_touch": false,
+   "bowl_lift_max_cm": 10.330340343191146,
+   "bowl_lift_argmax": 76,
+   "bowl_tilt_max_while_grasp_deg": 10.010418543725548,
+   "bowl_tilt_max_deg": 13.346391920519162,
+   "final_bowl_plate_xy_cm": 0.9791285140749753,
+   "final_bowl_plate_contact": true,
+   "final_bowl_tilt_deg": 0.3978692127655344,
+   "final_bowl_dz_cm": -2.67020900402134,
+   "min_bowl_plate_xy_cm": 0.5316967014688314,
+   "success_end": true,
+   "first_success_step": 94,
+   "bowl_plate_xy_at_last_grasp_cm": 1.2110548781106212
+  },
+  "XArm7": {
+   "close_cmd_step": 38,
+   "first_grasp_step": 45,
+   "last_grasp_step": 108,
+   "grasp_steps": 63,
+   "first_touch_step": 39,
+   "grip_bowl_dist_at_close_cm": 5.038065901525939,
+   "grip_minus_bowl_z_at_close_cm": 2.1356546838243284,
+   "grip_contacts_close_window": [
+    "glazed_rim_porcelain_ramekin_1"
+   ],
+   "arm_contacts_all": [],
+   "final_touch": false,
+   "bowl_lift_max_cm": 8.15747787911494,
+   "bowl_lift_argmax": 77,
+   "bowl_tilt_max_while_grasp_deg": 26.396229227967094,
+   "bowl_tilt_max_deg": 26.396229227967094,
+   "final_bowl_plate_xy_cm": 1.082773446594952,
+   "final_bowl_plate_contact": false,
+   "final_bowl_tilt_deg": 7.387133263596735,
+   "final_bowl_dz_cm": 0.9492720312852088,
+   "min_bowl_plate_xy_cm": 0.7149247168219202,
+   "success_end": false,
+   "first_success_step": null,
+   "bowl_plate_xy_at_last_grasp_cm": 1.11305047176589
+  }
+ },
+ "spikes": {
+  "pad_gap_jumps_step_mm": [],
+  "track_err_pos_spike_steps": [
+   93,
+   94,
+   95,
+   96,
+   97,
+   98,
+   99
+  ],
+  "track_err_rot_spike_steps": [
+   96,
+   97,
+   98,
+   99,
+   100,
+   101,
+   102,
+   103
+  ],
+  "track_err_pos_top3": [
+   [
+    96,
+    11.7
+   ],
+   [
+    97,
+    11.6
+   ],
+   [
+    98,
+    11.6
+   ]
+  ],
+  "track_err_rot_top3": [
+   [
+    99,
+    15.4
+   ],
+   [
+    100,
+    14.6
+   ],
+   [
+    98,
+    13.9
+   ]
+  ],
+  "pad_gap_hold_median_mm": {
+   "XArm7": 10.317624979791107,
+   "Panda": 5.942156811409767
+  },
+  "pad_gap_min_mm": {
+   "XArm7": 9.416963112890548,
+   "Panda": 3.311231693583119
+  }
+ },
+ "suggested_failure_point": "놓기",
+ "cause_tags": [
+  "같이 옮겨짐: glazed_rim_porcelain_ramekin_1"
+ ]
+}

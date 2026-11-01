@@ -1,4 +1,5 @@
-"""실험 4-후속1 표: task × {Panda 재생, retarget rot-clip quantile, retarget 제한 없음} 의 성공 수/5, 첫 성공 스텝, 추종오차, ±1 클립 스텝.
+"""실험 4-후속1 표: task × {Panda 재생, retarget rot-clip quantile, retarget 제한 없음} 의 성공 수, 첫 성공 스텝, 추종오차, ±1 클립 스텝.
+demo 0~9 중 결과가 있는 것만 세고, demo 0~4 / 5~9 / 합계를 따로 적는다.
 
 입력: $DART_ROOT/demos/oracle_t<N>/demo<k>/ 의 summary.json (+ 회전 q01~q99 클립 스텝 수는 retarget npz 의 rot_raw 와 actions 로 계산).
 출력: ~/hayeon/dart_xarm7/results/oracle_t45/summary.{json,md}. 성공 = 액션을 다 실행한 끝에서 _check_success() (summary 의 success_at_end).
@@ -15,7 +16,8 @@ import numpy as np
 D = pathlib.Path(os.path.expandvars("$DART_ROOT/demos"))
 OUT = pathlib.Path(os.path.expanduser("~/hayeon/dart_xarm7/results/oracle_t45"))
 OUT.mkdir(parents=True, exist_ok=True)
-TASKS, DEMOS = (4, 5), range(5)
+TASKS, DEMOS = (4, 5), range(10)
+BLOCKS = {"0~4": range(5), "5~9": range(5, 10), "0~9": range(10)}
 VARIANTS = {"quantile": "XArm7_retarget_rotq", "none": "XArm7_retarget"}
 # DEMO_PAIR.md (2026-10-08, 잡 129138) 의 t0 demo_0 기준값
 T0_REF = {"quantile": {"success": "성공", "first": 73, "pos": (4.0, 6.0), "rot": (5.9, 17.1), "clipped": 27},
@@ -46,20 +48,22 @@ for n in TASKS:
     for k in DEMOS:
         f, tag = D / f"oracle_t{n}" / f"demo{k}", f"libero_spatial_t{n}_demo_{k}"
         ps = load(f / f"{tag}_summary.json")
-        r = {"panda": None if ps is None else {"success": ps["Panda"]["success_at_end"], "first": ps["Panda"]["first_success_step"],
-                                                "frames": ps["Panda"]["frames"]}}
+        if ps is None:
+            continue
+        r = {"panda": {"success": ps["Panda"]["success_at_end"], "first": ps["Panda"]["first_success_step"], "frames": ps["Panda"]["frames"]}}
         for v, suf in VARIANTS.items():
             r[v] = retarget_row(f, tag, suf)
         rows[f"t{n}_demo{k}"] = r
 t0 = {v: retarget_row(D / "oracle_t0_check" / "demo0", "libero_spatial_t0_demo_0", suf) for v, suf in VARIANTS.items()}
 
 
-def agg(n, v):
-    rs = [rows[f"t{n}_demo{k}"][v] for k in DEMOS]
+def agg(n, v, demos=DEMOS):
+    rs = [rows[f"t{n}_demo{k}"][v] for k in demos if f"t{n}_demo{k}" in rows]
     done = [r for r in rs if r is not None]
     if not done:
         return None
-    a = {"n": len(done), "succ": sum(r["success"] for r in done), "first": [r["first"] for r in rs] if True else None}
+    a = {"n": len(done), "succ": sum(r["success"] for r in done), "ever": sum(r["first"] is not None for r in done),
+         "first": [r["first"] for r in done]}
     if v != "panda":
         for key in ("pos", "rot"):
             a[f"{key}_mean"] = float(np.mean([r[f"{key}_mean"] for r in done]))
@@ -71,36 +75,47 @@ def agg(n, v):
 
 
 summary = {"rows": rows, "t0_laptop": t0, "t0_ref_DEMO_PAIR": T0_REF,
-           "agg": {f"t{n}": {v: agg(n, v) for v in ("panda", *VARIANTS)} for n in TASKS}}
-gate = {f"t{n}": summary["agg"][f"t{n}"]["panda"] and summary["agg"][f"t{n}"]["panda"]["succ"] >= 4 for n in TASKS}
+           "agg": {f"t{n}": {v: agg(n, v) for v in ("panda", *VARIANTS)} for n in TASKS},
+           "agg_blocks": {f"t{n}": {b: {v: agg(n, v, ds) for v in ("panda", *VARIANTS)} for b, ds in BLOCKS.items()} for n in TASKS}}
+gate = {f"t{n}": bool(agg(n, "panda", range(5))) and agg(n, "panda", range(5))["succ"] >= 4 for n in TASKS}
 summary["stop1_gate"] = {"criterion": "task 마다 Panda 재생 성공 >= 4/5", **gate, "pass": all(gate.values())}
 (OUT / "summary.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False))
 
 fs = lambda xs: " ".join("–" if x is None else str(x) for x in xs)
 md = ["# 실험 4-후속1 요약 (oracle_t45_summary.py 가 생성)", "",
-      "성공 = 액션을 끝까지 실행한 뒤 성공 판정. 첫 성공 = demo_0~4 순서, – 는 성공 안 함. 추종오차 평균 = demo 별 평균의 평균, 최대 = 전체 최대.", "",
-      "| task | 실행 | 성공/5 | 첫 성공 스텝 (demo0~4) | 액션 수 | 추종오차 위치 평균/최대 cm | 회전 평균/최대 ° | ±1 클립 스텝 | q01~q99 회전 클립 스텝 |",
-      "|---|---|---|---|---|---|---|---|---|"]
+      "성공 = 액션을 끝까지 실행한 뒤 성공 판정. 성공 수 = demo 0~4 / 5~9 / 합계. 첫 성공·액션 수·클립 = demo 번호 순서, – 는 성공 안 함.",
+      "한 번이라도 = 도중에 성공 판정이 한 번이라도 난 demo 수 (LIBERO 평가는 첫 성공에서 에피소드를 끝냄).",
+      "추종오차 평균 = demo 별 평균의 평균, 최대 = 전체 최대.", "",
+      "| task | 실행 | 성공 0~4 / 5~9 / 합계 | 한 번이라도 | 첫 성공 스텝 | 액션 수 | 추종오차 위치 평균/최대 cm | 회전 평균/최대 ° | ±1 클립 스텝 | q01~q99 회전 클립 스텝 |",
+      "|---|---|---|---|---|---|---|---|---|---|"]
+
+
+def counts(n, v):
+    out = []
+    for b in BLOCKS:
+        a = summary["agg_blocks"][f"t{n}"][b][v]
+        out.append("–" if a is None else f"{a['succ']}/{a['n']}")
+    return " / ".join(out)
 for v in ("quantile", "none"):
     ref = T0_REF[v]
     pos = "–" if ref["pos"] is None else f"{ref['pos'][0]} / {ref['pos'][1]}"
     rot = "–" if ref["rot"] is None else f"{ref['rot'][0]} / {ref['rot'][1]}"
-    md.append(f"| t0 기준 (DEMO_PAIR) | retarget {v} | {ref['success']} | {ref['first']} | 98 | {pos} | {rot} | {ref['clipped']} | – |")
+    md.append(f"| t0 기준 (DEMO_PAIR) | retarget {v} | {ref['success']} | – | {ref['first']} | 98 | {pos} | {rot} | {ref['clipped']} | – |")
     r = t0[v]
     if r:
-        md.append(f"| t0 노트북 재현 | retarget {v} | {'성공' if r['success'] else '실패'} | {r['first']} | {r['frames']} | {r['pos_mean']:.1f} / {r['pos_max']:.1f} | "
+        md.append(f"| t0 노트북 재현 | retarget {v} | {'성공' if r['success'] else '실패'} | – | {r['first']} | {r['frames']} | {r['pos_mean']:.1f} / {r['pos_max']:.1f} | "
                   f"{r['rot_mean']:.1f} / {r['rot_max']:.1f} | {r['clipped']} | {r['rot_quantile_clipped'] if v == 'quantile' else '–'} |")
 for n in TASKS:
     A = summary["agg"][f"t{n}"]
-    frames = [rows[f"t{n}_demo{k}"]["panda"]["frames"] if rows[f"t{n}_demo{k}"]["panda"] else None for k in DEMOS]
+    frames = [rows[f"t{n}_demo{k}"]["panda"]["frames"] for k in DEMOS if f"t{n}_demo{k}" in rows]
     if A["panda"]:
-        md.append(f"| t{n} | Panda 재생 | {A['panda']['succ']}/{A['panda']['n']} | {fs(A['panda']['first'])} | {fs(frames)} | – | – | – | – |")
+        md.append(f"| t{n} | Panda 재생 | {counts(n, 'panda')} | {A['panda']['ever']}/{A['panda']['n']} | {fs(A['panda']['first'])} | {fs(frames)} | – | – | – | – |")
     for v in VARIANTS:
         a = A[v]
         if a:
-            md.append(f"| t{n} | retarget {v} | {a['succ']}/{a['n']} | {fs(a['first'])} | {fs(a['frames'])} | {a['pos_mean']:.1f} / {a['pos_max']:.1f} | "
+            md.append(f"| t{n} | retarget {v} | {counts(n, v)} | {a['ever']}/{a['n']} | {fs(a['first'])} | {fs(a['frames'])} | {a['pos_mean']:.1f} / {a['pos_max']:.1f} | "
                       f"{a['rot_mean']:.1f} / {a['rot_max']:.1f} | {fs(a['clipped'])} | {fs(a['rot_quantile_clipped']) if v == 'quantile' else '–'} |")
-md += ["", f"STOP1 기준 (task 마다 Panda 재생 성공 ≥ 4/5): " + ", ".join(f"{k} {'통과' if g else '미달'}" for k, g in gate.items()), ""]
+md += ["", f"STOP1 기준 (task 마다 demo 0~4 Panda 재생 성공 ≥ 4/5): " + ", ".join(f"{k} {'통과' if g else '미달'}" for k, g in gate.items()), ""]
 md += ["## demo 별", "", "| demo | Panda | quantile 성공/첫 | quantile 추종 위치 평균/최대 cm, 회전 평균/최대 ° | none 성공/첫 | none 추종 위치, 회전 |", "|---|---|---|---|---|---|"]
 for key, r in rows.items():
     cell = lambda x: "–" if x is None else f"{'성공' if x['success'] else '실패'} / {x['first']}"

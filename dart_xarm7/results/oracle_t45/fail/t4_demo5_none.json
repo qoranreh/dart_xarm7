@@ -1,0 +1,176 @@
+{
+ "name": "t4_demo5_none",
+ "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+ "variant": "none",
+ "env_meta": "XARM7_COLOR=white, XARM7_DYNAMICS=panda",
+ "src_root": "/home/qoranreh/dart_laptop/demos/oracle_rep/omp1_a",
+ "omp_num_threads": "1",
+ "eef_replay_max_diff_m": {
+  "Panda": 0.0,
+  "XArm7": 0.0
+ },
+ "replay_success_matches_summary": true,
+ "success_after_extra_wait": {
+  "Panda": 1,
+  "XArm7": null
+ },
+ "after_extra_wait": {
+  "Panda": {
+   "bowl_pos": [
+    0.07046323066037452,
+    0.22545538259233616,
+    0.910209256867094
+   ],
+   "bowl_tilt_deg": 8.400352340649441,
+   "grasp": false,
+   "touch": false,
+   "bowl_plate_xy": 0.019052492206175328,
+   "bowl_plate_contact": true,
+   "grip_bowl_dist": 0.06226151949989015,
+   "grip_minus_bowl_z": 0.03774408777823002,
+   "grip_other": [],
+   "arm_other": [],
+   "success": true,
+   "bowl_contacts": [
+    "plate_1"
+   ]
+  },
+  "XArm7": {
+   "bowl_pos": [
+    0.05383606597389045,
+    -0.133380792706036,
+    1.0771258793563279
+   ],
+   "bowl_tilt_deg": 34.92411073580403,
+   "grasp": false,
+   "touch": true,
+   "bowl_plate_xy": 0.3480483692936632,
+   "bowl_plate_contact": false,
+   "grip_bowl_dist": 0.06159308618708066,
+   "grip_minus_bowl_z": 0.02442696736838834,
+   "grip_other": [
+    "wooden_cabinet_1"
+   ],
+   "arm_other": [],
+   "success": false,
+   "bowl_contacts": [
+    "gripper_body",
+    "wooden_cabinet_1"
+   ]
+  }
+ },
+ "moved_objects_cm": {
+  "Panda": {},
+  "XArm7": {}
+ },
+ "events": {
+  "Panda": {
+   "close_cmd_step": 53,
+   "first_grasp_step": 70,
+   "last_grasp_step": 154,
+   "grasp_steps": 82,
+   "first_touch_step": 58,
+   "grip_bowl_dist_at_close_cm": 5.232763556877116,
+   "grip_minus_bowl_z_at_close_cm": 3.959957308879125,
+   "grip_contacts_close_window": [
+    "wooden_cabinet_1"
+   ],
+   "arm_contacts_all": [],
+   "final_touch": true,
+   "bowl_lift_max_cm": 16.16714307660685,
+   "bowl_lift_argmax": 91,
+   "bowl_tilt_max_while_grasp_deg": 26.12301503898678,
+   "bowl_tilt_max_deg": 26.12301503898678,
+   "final_bowl_plate_xy_cm": 1.8113271998103642,
+   "final_bowl_plate_contact": true,
+   "final_bowl_tilt_deg": 11.28855622243065,
+   "final_bowl_dz_cm": -15.157178619731837,
+   "min_bowl_plate_xy_cm": 1.669220990035426,
+   "success_end": true,
+   "first_success_step": 138,
+   "bowl_plate_xy_at_last_grasp_cm": 1.803097241841833
+  },
+  "XArm7": {
+   "close_cmd_step": 53,
+   "first_grasp_step": 60,
+   "last_grasp_step": 157,
+   "grasp_steps": 93,
+   "first_touch_step": 50,
+   "grip_bowl_dist_at_close_cm": 5.58749217948797,
+   "grip_minus_bowl_z_at_close_cm": 1.5700402620126175,
+   "grip_contacts_close_window": [],
+   "arm_contacts_all": [],
+   "final_touch": true,
+   "bowl_lift_max_cm": 1.4459879979203283,
+   "bowl_lift_argmax": 157,
+   "bowl_tilt_max_while_grasp_deg": 32.09989607095037,
+   "bowl_tilt_max_deg": 32.09989607095037,
+   "final_bowl_plate_xy_cm": 32.46847301518815,
+   "final_bowl_plate_contact": false,
+   "final_bowl_tilt_deg": 32.09989607095037,
+   "final_bowl_dz_cm": 1.4459879979203283,
+   "min_bowl_plate_xy_cm": 29.78524370872111,
+   "success_end": false,
+   "first_success_step": null,
+   "bowl_plate_xy_at_last_grasp_cm": 32.46847301518815
+  }
+ },
+ "spikes": {
+  "pad_gap_jumps_step_mm": [
+   [
+    69,
+    -2.0
+   ],
+   [
+    70,
+    -2.4
+   ],
+   [
+    71,
+    -2.1
+   ]
+  ],
+  "track_err_pos_spike_steps": [],
+  "track_err_rot_spike_steps": [],
+  "track_err_pos_top3": [
+   [
+    147,
+    37.0
+   ],
+   [
+    146,
+    36.9
+   ],
+   [
+    145,
+    36.8
+   ]
+  ],
+  "track_err_rot_top3": [
+   [
+    38,
+    17.3
+   ],
+   [
+    66,
+    17.2
+   ],
+   [
+    39,
+    17.1
+   ]
+  ],
+  "pad_gap_hold_median_mm": {
+   "XArm7": 3.4280455079901713,
+   "Panda": 3.1385927359231607
+  },
+  "pad_gap_min_mm": {
+   "XArm7": 1.604023633753962,
+   "Panda": 3.1052528589155597
+  }
+ },
+ "suggested_failure_point": "들기",
+ "cause_tags": [
+  "못 들어 올림"
+ ]
+}

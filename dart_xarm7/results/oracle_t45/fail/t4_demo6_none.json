@@ -1,0 +1,162 @@
+{
+ "name": "t4_demo6_none",
+ "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+ "variant": "none",
+ "env_meta": "XARM7_COLOR=white, XARM7_DYNAMICS=panda",
+ "src_root": "/home/qoranreh/dart_laptop/demos/oracle_rep/omp1_a",
+ "omp_num_threads": "1",
+ "eef_replay_max_diff_m": {
+  "Panda": 0.0,
+  "XArm7": 0.0
+ },
+ "replay_success_matches_summary": true,
+ "success_after_extra_wait": {
+  "Panda": null,
+  "XArm7": null
+ },
+ "after_extra_wait": {
+  "Panda": {
+   "bowl_pos": [
+    0.061519253569016594,
+    -0.08843851285705462,
+    1.0686245894156927
+   ],
+   "bowl_tilt_deg": 15.39540922963373,
+   "grasp": false,
+   "touch": false,
+   "bowl_plate_xy": 0.2836032971783808,
+   "bowl_plate_contact": false,
+   "grip_bowl_dist": 0.3688244238499547,
+   "grip_minus_bowl_z": -0.108892948904041,
+   "grip_other": [],
+   "arm_other": [],
+   "success": false,
+   "bowl_contacts": [
+    "wooden_cabinet_1"
+   ]
+  },
+  "XArm7": {
+   "bowl_pos": [
+    0.07545857252639604,
+    -0.1479457182991473,
+    1.0625599683749973
+   ],
+   "bowl_tilt_deg": 1.7308668332453257e-05,
+   "grasp": false,
+   "touch": false,
+   "bowl_plate_xy": 0.34932795689304696,
+   "bowl_plate_contact": false,
+   "grip_bowl_dist": 0.4241112291417641,
+   "grip_minus_bowl_z": -0.14153404083043075,
+   "grip_other": [
+    "plate_1"
+   ],
+   "arm_other": [],
+   "success": false,
+   "bowl_contacts": [
+    "wooden_cabinet_1"
+   ]
+  }
+ },
+ "moved_objects_cm": {
+  "Panda": {},
+  "XArm7": {}
+ },
+ "events": {
+  "Panda": {
+   "close_cmd_step": 47,
+   "first_grasp_step": 57,
+   "last_grasp_step": 60,
+   "grasp_steps": 2,
+   "first_touch_step": 56,
+   "grip_bowl_dist_at_close_cm": 5.937796289128898,
+   "grip_minus_bowl_z_at_close_cm": 3.6694730792016683,
+   "grip_contacts_close_window": [
+    "wooden_cabinet_1"
+   ],
+   "arm_contacts_all": [],
+   "final_touch": false,
+   "bowl_lift_max_cm": 3.9690355580543013,
+   "bowl_lift_argmax": 65,
+   "bowl_tilt_max_while_grasp_deg": 18.760678212200595,
+   "bowl_tilt_max_deg": 50.205784514292965,
+   "final_bowl_plate_xy_cm": 28.360313593650144,
+   "final_bowl_plate_contact": false,
+   "final_bowl_tilt_deg": 15.395806799645248,
+   "final_bowl_dz_cm": 0.6064775234860154,
+   "min_bowl_plate_xy_cm": 28.360202295993197,
+   "success_end": false,
+   "first_success_step": null,
+   "bowl_plate_xy_at_last_grasp_cm": 33.753572424741435
+  },
+  "XArm7": {
+   "close_cmd_step": 47,
+   "first_grasp_step": 56,
+   "last_grasp_step": 57,
+   "grasp_steps": 2,
+   "first_touch_step": 53,
+   "grip_bowl_dist_at_close_cm": 6.434576515377982,
+   "grip_minus_bowl_z_at_close_cm": 3.98887277201585,
+   "grip_contacts_close_window": [],
+   "arm_contacts_all": [],
+   "final_touch": false,
+   "bowl_lift_max_cm": 0.4938683516494846,
+   "bowl_lift_argmax": 55,
+   "bowl_tilt_max_while_grasp_deg": 4.740078157390352,
+   "bowl_tilt_max_deg": 10.227570186420037,
+   "final_bowl_plate_xy_cm": 33.78878709356901,
+   "final_bowl_plate_contact": false,
+   "final_bowl_tilt_deg": 1.7308668332453257e-05,
+   "final_bowl_dz_cm": 0.0,
+   "min_bowl_plate_xy_cm": 33.787487371553745,
+   "success_end": false,
+   "first_success_step": null,
+   "bowl_plate_xy_at_last_grasp_cm": 34.75266850245533
+  }
+ },
+ "spikes": {
+  "pad_gap_jumps_step_mm": [],
+  "track_err_pos_spike_steps": [],
+  "track_err_rot_spike_steps": [],
+  "track_err_pos_top3": [
+   [
+    68,
+    6.7
+   ],
+   [
+    67,
+    6.6
+   ],
+   [
+    82,
+    6.6
+   ]
+  ],
+  "track_err_rot_top3": [
+   [
+    84,
+    11.6
+   ],
+   [
+    83,
+    11.6
+   ],
+   [
+    85,
+    11.5
+   ]
+  ],
+  "pad_gap_hold_median_mm": {
+   "XArm7": 4.10119822599302,
+   "Panda": -0.00038970826598573594
+  },
+  "pad_gap_min_mm": {
+   "XArm7": 2.6956134616222127,
+   "Panda": -0.0004646354635692851
+  }
+ },
+ "suggested_failure_point": "파지(빈손으로 닫힘)",
+ "cause_tags": [
+  "Panda 도 실패 (비교 제외)"
+ ]
+}

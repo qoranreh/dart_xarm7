@@ -3,10 +3,23 @@
 **실험 문장 (사용자 확정):** 이건 Panda 정답 궤적의 xArm7 retarget 으로 바꿔서 t4·t5 성공 수를 보고, 1/5 이하면 H_body(몸이 못 함) / 4/5 이상이면 H_policy(정책이 못 배움).
 rot-clip 은 quantile·none 둘 다 보고, 나머지 경우(rot-clip 있을 때만 실패 = 데모 규칙 문제, 2~3/5 = 판단 불가)는 STOP2 규칙대로. 학습·합성·정책 평가 없음.
 
-## 결론 (STOP2)
+## 최종 결론 (demo 0~9, 2026-11-02 08:51 — 아래 9~11절)
+1. Panda 재생 → xArm7 retarget 성공 (끝에서 성공, 괄호 = 도중에 한 번이라도): **t4 9/10 → 5/10 (rot-clip) · 2/10 (4/10) (없음)**, **t5 10/10 → 5/10 · 5/10**.
+   t4 demo6 은 Panda 재생부터 실패 (비교 제외). 같은 retarget 40개를 세 번 돌려도 demo별 성공/실패가 전부 같음.
+2. 실패 21개 (t4 demo6 제외) = **파지 10 (빈손으로 닫힘 6, 기운 채 잡힘 4) · 들기 2 · 놓기 9** · 접근 0.
+   t4 (11): 서랍 안 파지 실패 7, 쥐었는데 서랍에서 못 들어 올림 2, 접시에 놓아 성공했다가 그릇이 넘어짐 2 (rot-clip 없음).
+   t5 (10): **램킨이 그릇과 같이 들려 접시 위 램킨에 그릇이 얹힘 6 (xArm7 에서만, 같은 demo 의 Panda 재생에선 램킨 안 움직임)**, 접시 중심 3.6cm 1, 파지 3.
+3. 판정: H_body (≤1/5, 10개면 ≤2/10) 도 H_policy (≥4/5, ≥8/10) 도 아님 — 두 task 모두 정답 궤적으로 절반쯤 성공. demo 를 늘려도 판단 불가 구간 그대로.
+   rot-clip: t5 는 같고, t4 는 자르는 쪽이 더 잘 됨 → "자를 때만 실패" (데모 규칙 문제) 아님.
+   참고: θ0 의 xArm7 평가는 t4 6/10·2/10, t5 0/10·0/10 (EVAL_RESULTS.md, 장면이 다름) → t5 는 정답 궤적(5/10)보다 정책이 크게 낮음.
+
+**정정 (2026-11-02):** 처음 STOP2 보고와 4절에 "t5 demo4 는 Panda 원본 재생에서도 램킨이 같이 들렸다" 고 적었는데 **틀림**.
+그 근거였던 일회성 점검 스크립트가 `Panda` 인자에도 xArm7 env 를 만들어 (xArm7 에 Panda 액션을 넣은 것) 잘못 읽었다. 11절의 실제 Panda 재생에서는 램킨이 2cm 이상 움직이지 않음.
+
+## 첫 보고 (STOP2, demo 0~4)
 1. Panda 재생 → xArm7 retarget 성공: **t4 5/5 → 2/5 (rot-clip) · 2/5 (없음)**, **t5 5/5 → 3/5 (rot-clip) · 3/5 (없음)**.
 2. 실패 10개 = **파지 7 (빈손으로 닫힘 5, 기운 채 잡힘 2) · 놓기 3** · 접근 0 · 들기 0. t4 는 6개 전부 서랍 안 파지 실패
-   (Panda 보다 1.8~3.1cm 높거나 1.2~1.5cm 옆에서 닫혀 양 패드가 3~9스텝만 닿고 빠짐, 그릇은 ≤1.5cm 들림). t5 놓기 3개 중 2개(demo4)는 Panda 원본 데모에서도 램킨이 그릇에 붙어 같이 들린 경우.
+   (Panda 보다 1.8~3.1cm 높거나 1.2~1.5cm 옆에서 닫혀 양 패드가 3~9스텝만 닿고 빠짐, 그릇은 ≤1.5cm 들림). t5 놓기 3개 중 2개(demo4)는 램킨이 그릇에 붙어 같이 들린 경우 (xArm7 에서만 — 위 정정).
    추종오차 위치 평균은 t0 와 비슷 (3.5~4.3 vs 4.0cm) 하지만 최대가 큼 (10~12 vs 6.0cm), 회전 quantile t4 9.4/24.1° · t5 5.4/21.7° vs t0 5.9/17.1°. ±1 클립 10~53스텝 (t0 27, 단 액션 수 119~158 vs 98).
 3. 예상과 대조: 네 칸 모두 2~3/5 → **판단 불가**. H_body(≤1/5) 도 H_policy(≥4/5) 도 아님. 두 rot-clip 의 성공 수가 같아 데모 규칙 문제도 아님
    (t5 demo2·demo3 만 서로 엇갈림). → **demo_5~9 추가 제안** (같은 러너에 `DEMOS="5 6 7 8 9"`, fetch 의 `names[:5]` 를 늘려야 함 — 아래 8절).
@@ -120,7 +133,7 @@ rot-clip 은 quantile·none 둘 다 보고, 나머지 경우(rot-clip 있을 때
 - **t4 공통:** 서랍 안 그릇을 Panda 보다 높거나 옆에서 집어 테두리만 잠깐 걸렸다가 들어 올리기 시작할 때 빠짐. 그리퍼-캐비닛 접촉은 Panda 도 같이 있어 (닫기 전후) xArm7 만의 충돌 증거는 없음.
   demo0·4 는 닫는 순간 grip_site 가 Panda 보다 1.8~3.1cm 높음 (목표 깊이에 못 미침), demo2 는 높이는 비슷하고 수평으로 1.2~1.5cm 벗어남.
   위치 추종오차 최대는 demo0·2 에서 서랍으로 내려가는 구간 (닫기 22~24스텝 전), demo4 에서는 빈손으로 이동하는 구간.
-- **t5 demo4 는 데모 자체가 아슬아슬:** Panda 원본 재생에서도 램킨이 그릇과 같이 9.9cm 들려 33.8cm 옮겨짐 (Panda 는 91스텝에 On 성립 → 성공). xArm7 은 같은 일이 생기고 그릇이 램킨 위에 남아 실패. 일회성 점검 (커밋 안 함) 으로 그릇의 접촉 상대 = 램킨 geom 만 확인.
+- ~~t5 demo4 는 Panda 원본 재생에서도 램킨이 같이 들림~~ → **틀림 (맨 위 정정)**. 램킨이 같이 들려 옮겨지는 건 xArm7 에서만. 끝에 그릇의 접촉 상대가 램킨뿐인 것은 맞음.
 - **pad_gap 튐:** 10개 모두 없음 (그리퍼 명령이 일정한데 한 스텝에 2mm 넘게 변한 곳, 명령 변경 후 15스텝 제외). t4 xArm7 닫힘 최소 2.8~3.5mm (빈손 수준), 같은 데모의 Panda 최소 3.6~6.2mm.
 - 액션 뒤 20스텝 더 기다려도 (그리퍼 열림) 늦게 성공한 경우 0 (`success_after_extra_wait`).
 
@@ -162,3 +175,64 @@ $LIBERO_PY ~/hayeon/dart_xarm7/oracle_t45_summary.py
 source ~/hayeon/dart_xarm7/exp6_cond.sh && exp6_env v0 && $LIBERO_PY ~/hayeon/dart_xarm7/oracle_fail_analysis.py --task 4 --demo 0 --variant quantile
 ```
 demo_5~9 를 하려면: `fetch_hdf5_demo.py` 는 `names[:5]` (demo_0~4) 만 저장 → 개수 인자 추가 후 새 npz 이름으로 받고, `DEMOS="5 6 7 8 9"` 로 러너 실행 (러너의 npz 경로도 맞춰야 함).
+
+---
+
+## 9. demo_5~9 추가 (사용자 요청, 08:25 → 08:29)
+- `fetch_hdf5_demo.py` 에 `--demos a-b` 추가 (기본 0-4 = 이전 `names[:5]` 와 같음, 출력 이름 `..._hdf5_demo<a>-<b>.npz`). `--task {4,5} --demos 5-9` 각 58·65s.
+  액션 수 t4 158 167 156 159 132, t5 100 101 129 123 118.
+- 러너: 원본 npz 를 demo 5개 단위로 고름 (`npz <task> <demo>`). `oracle_viewer.py`·`oracle_fail_analysis.py` 도 같은 규칙.
+- `DEMOS="5 6 7 8 9" run_oracle_t45.sh panda` (08:27:14 → 08:27:35) → `retarget` (08:27:35 → 08:28:41), 30개 rc=0.
+- `oracle_t45_summary.py` 를 demo 0~9 로 확장 (0~4 / 5~9 / 합계, "한 번이라도" 열).
+
+| task | 실행 | 0~4 | 5~9 | 합계 (끝) | 한 번이라도 |
+|---|---|---|---|---|---|
+| t4 | Panda 재생 | 5/5 | 4/5 (demo6 실패) | 9/10 | 9/10 |
+| t4 | retarget quantile | 2/5 | 3/5 | **5/10** | 5/10 |
+| t4 | retarget none | 2/5 | 0/5 | **2/10** | 4/10 (demo7·9 는 도중 성공 후 끝에 실패) |
+| t5 | Panda 재생 | 5/5 | 5/5 | 10/10 | 10/10 |
+| t5 | retarget quantile | 3/5 | 2/5 | **5/10** | 5/10 |
+| t5 | retarget none | 3/5 | 2/5 | **5/10** | 5/10 |
+
+추종오차 (위치 평균/최대 cm, 회전 평균/최대 °): t4 quantile 3.5/10.2, 10.6/28.2 · t4 none 5.8/37.0 (demo5 가 17.3/37.0 으로 궤적 이탈), 7.3/17.3 · t5 quantile 3.6/11.7, 4.9/21.7 · t5 none 3.9/12.0, 4.1/15.8 (t0 4.0/6.0, 5.9/17.1).
+
+## 10. 반복성 (같은 retarget 을 다시 돌리면 같은가)
+- 계기: 실패 재생에서 t4 demo8 none 이 원래 실행과 0.35m 벌어짐 (float64 액션을 똑같이 복원해도). 같은 retarget 을 별도 폴더에서 두 번 다시 돌리니 둘은 서로 같고 원래 실행과는 40스텝부터 갈라짐
+  (0스텝부터 1e-19 차이, 39스텝 1e-12 → 40스텝 접촉에서 1mm → 이후 수십 cm). 스레드 1개로 돌린 것도 또 다름 → 멀티스레드 OpenBLAS 반올림 + CPU 부하 탓으로 추정.
+- 러너에 `ROOT=<다른 루트>` 추가 (Panda npz 는 기본 폴더 것을 링크, 기존 결과 덮어쓰기 없음).
+  `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 ROOT=$DART_ROOT/demos/oracle_rep/omp1_{a,b} DEMOS="0..9" P=7 run_oracle_t45.sh retarget` (08:41:04 → 08:45:02, 80개 rc=0).
+- 결과 (`results/oracle_t45/repeat_runs.json`):
+  - **성공/실패: 원래 실행 · omp1_a · omp1_b 가 40개 모두 같음** (끝 성공·첫 성공 스텝 패턴까지). 위 표의 숫자는 실행에 따라 안 바뀜.
+  - omp1_a vs omp1_b: 물리 (eef·액션) 40/40 비트 동일. 이미지는 26/40 만 동일 (EGL 렌더 차이, 물리 무관).
+  - 원래 실행 vs omp1: eef 차이 39개 ≤ 2.2mm, t4 demo8 none 만 18.8cm.
+- → 재현이 필요하면 `OMP_NUM_THREADS=1`. 실패 분석·영상은 omp1_a 기준으로 다시 만듦 (11절).
+
+## 11. 실패 분석 갱신 (08:46 → 08:51, 23개, `--src-root $DART_ROOT/demos/oracle_rep/omp1_a`, OMP_NUM_THREADS=1)
+`oracle_fail_analysis.py` 수정:
+- 재생 액션을 원래 실행과 같은 float64 로: Panda = hdf5 원본 액션, xArm7 = npz `pos_raw`·`rot_raw` 를 make_retarget_demo.py 와 같은 식으로 다시 자름 (npz `actions` 와 float32 로 같은지 assert).
+  → **23개 모두 재생 eef 차이 0, 성공 여부 summary 와 같음.**
+- 그릇 말고 2cm 넘게 움직인 물체 (`moved_objects_cm`), 추가 대기 뒤 그릇의 접촉 상대 (`bowl_contacts`, 패드 외 그리퍼 = gripper_body, 팔 = arm).
+- 판정 규칙 보강 (+ 원인 태그 `cause_tags`): 도중 성공 → 놓기 ("성공 후 놓침"). 접시 8cm 안까지 못 가져감 → 기울기 > max(Panda+10°, 30°) 면 파지(기운 채),
+  양 패드 접촉 < 10스텝 이면 파지(빈손), 그 밖은 들기 ("못 들어 올림"/"옮기다 놓침"). 가져갔는데 실패 → 놓기 ("3cm 밖", "같이 옮겨짐: 램킨", "기운 채 운반"). Panda 도 실패면 "비교 제외".
+- 비교 영상 `<name>_cmp.mp4` ([Panda | xArm7] 같은 스텝). 영상은 임시 파일에 쓴 뒤 이름 바꾸기 (재생 중 플레이어 보호).
+- 프레임으로 직접 본 것 10개 (유형마다 1개 이상): t4 demo0 q·demo2 q·demo4 n·demo5 n·demo8 n·demo9 n, t5 demo2 q·demo4 n·demo6 n·demo8 q — 모두 규칙 판정과 같음.
+  경계: t4 demo4 는 양 패드 접촉 none 10스텝 (들기) / quantile 8스텝 (파지).
+
+| 실패 지점 | t4 rot-clip | t4 없음 | t5 rot-clip | t5 없음 | 합계 |
+|---|---|---|---|---|---|
+| 파지(빈손으로 닫힘) | 2 (d0, d4) | 2 (d0, d2) | 1 (d6) | 1 (d6) | 6 |
+| 파지(기운 채 잡힘) | 2 (d2, d8) | 1 (d8) | 1 (d2) | 0 | 4 |
+| 들기 | 0 | 2 (d4, d5 — 서랍에서 못 들어 올림) | 0 | 0 | 2 |
+| 놓기 | 0 | 2 (d7, d9 — 성공 후 그릇 넘어짐) | 3 (d4, d8, d9 — 램킨째) | 4 (d3 3.6cm, d4·d8·d9 램킨째) | 9 |
+| (Panda 도 실패, 제외) | 1 (d6) | 1 (d6) | – | – | 2 |
+
+- t4 파지 실패 공통: 닫는 순간 grip_site 가 Panda 보다 높거나 (d0·d4 약 2~3cm) 옆 (d2). 양 패드 접촉 빈손 3~8스텝, 기운 채 8~24스텝 (Panda 72~89). 기운 채 (d8) 는 들면서 그릇이 약 50° 기울어 캐비닛 위에 떨어짐.
+- t5 램킨째 6개: 램킨이 28~32cm 같이 옮겨지고 그릇이 그 위에 얹혀 접시와 안 닿음 (끝 접촉 상대 = 램킨). 같은 demo 의 Panda 재생은 램킨 이동 < 2cm.
+
+## 12. 결과 페이지·노션 (사용자 요청)
+- 아티팩트 (비공개): https://claude.ai/artifact/GXUT3GSbitqH32VhepjPiM — 판정, demo 격자 (칸 누르면 영상), 실패 영상 23개 플레이어 ([Panda | xArm7] · [xArm7 | 손목] · 그래프, 필터, ← → 이동), 분포, 추종오차, 시작 장면.
+  빌더는 세션 임시 폴더라 레포에 없음. 영상 원본: `results/oracle_t45/videos/` (git 제외).
+- 노션 [4-후속1] 페이지 끝에 "5. 데모 MuJoCo 실행 명령" 절 추가 (oracle_viewer.py 사용법·두 창 비교·VLC·npz 다시 만들기).
+
+신규·수정 (9~11절): 수정 `fetch_hdf5_demo.py` (`--demos`), `run_oracle_t45.sh` (demo 블록, `ROOT`), `oracle_t45_summary.py` (demo 0~9, 한 번이라도),
+`oracle_fail_analysis.py` (`--src-root`, float64 재생, 접촉·이동 물체, 규칙·태그, 비교 영상), `oracle_viewer.py` (demo 블록) / 결과 `results/oracle_t45/{summary.*,repeat_runs.json,fail/}`.
