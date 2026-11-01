@@ -1,0 +1,10 @@
+{
+ "task": "pick up the black bowl on the ramekin and place it on the plate",
+ "demo": "demo_0",
+ "env_meta": "XARM7_COLOR=white, XARM7_DYNAMICS=panda",
+ "ik_pos_err": 5.553294775597906e-07,
+ "ik_rot_err": 2.0967336535356947e-06,
+ "n_copied_joints": 9,
+ "missing_joints": [],
+ "pixel_diff_mean": 4.4050649007161455
+}

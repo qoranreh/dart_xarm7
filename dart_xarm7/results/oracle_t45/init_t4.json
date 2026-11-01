@@ -1,0 +1,10 @@
+{
+ "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate",
+ "demo": "demo_0",
+ "env_meta": "XARM7_COLOR=white, XARM7_DYNAMICS=panda",
+ "ik_pos_err": 8.349490812898076e-07,
+ "ik_rot_err": 1.2018292397788031e-06,
+ "n_copied_joints": 9,
+ "missing_joints": [],
+ "pixel_diff_mean": 4.809102376302083
+}
