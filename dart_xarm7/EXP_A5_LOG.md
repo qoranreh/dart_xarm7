@@ -51,3 +51,17 @@ env: `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1`, env.sh + client_env.sh (MUJOCO_
 - RunPod 에서 받기 (data/ 는 .gitignore 라 git 에 없음):
   `huggingface_hub.snapshot_download("qoranreh/dart-xarm7-oneshot", allow_patterns=["a5/data/*"], local_dir=<dir>)`
   → `<dir>/a5/data/lerobot/libero_spatial_t5_demo_0_{src_panda,tgt_xarm7_retarget_rotclip}` 를 `~/hayeon/dart_xarm7/data/lerobot/a5/` 로.
+
+## 4. 본 단계 1 — FT 2회 (2026-11-08, 잡 133826, ece-agpu4, A100-SXM4-80GB, 드라이버 535.104.05)
+
+- 계획 변경: RunPod 대신 이 잡에서 FT·합성·평가까지 (사용자 지시 "여기서 바로 FT 진행", 본 단계 1~3 재전송).
+- `/var/tmp` 여유 **24G** (94% 사용) → `DART_SHM=/dev/shm/introai34_dart_133826` 로 복원 ($DART_ROOT 가 /dev/shm 링크, /dev/shm 여유 792G·노드 RAM 2TB).
+  **잡 끝에 `rm -rf /dev/shm/introai34_dart_133826` 필요** (노드 공용 RAM, 자동으로 안 지워짐).
+- 복원 17:00:34 → repo 207s, uv_sync 903s, hf_ckpts 596s, theta0 968s (17:35:12). osmesa 1차 rc=1 (conda-forge HTTP 오류, 일시적) → 백그라운드 재시도 (`logs/restore/osmesa_retry.log`, 평가 전에만 필요).
+- **`dart_oneshot_ft.patch` 적용** (17:2x, `git apply`, `git diff` sha256 = 패치 파일 df7b581f…). restore_env.sh 는 패치를 적용하지 않음 — 러너가 `git apply --reverse --check` 로 확인하고 없으면 중단하도록 함.
+- 러너 `run_oneshot_ft_a5.sh` = run_oneshot_ft.sh 에서 DATA/OUT/LOGDIR·로그 복사 경로만 변경 (학습 설정 diff 없음). 추가: 패치 확인, HF `a5/demos` 의 STOP1 npz 와 데이터셋 이미지·액션 프레임 단위 대조 + info.json·method 로그, loss 요약, 러닝마다 HF `a5/oneshot_{src,tgt}` 백업.
+  - DRY_RUN 17:34 통과: src/tgt 모두 137 프레임 = npz, tgt env_meta `XARM7_COLOR=white, XARM7_DYNAMICS=panda`, method "MimicGen-style retarget … + rotation clipped to norm q01..q99 [white, panda]".
+- 실행 17:35:31 `setsid nohup bash run_oneshot_ft_a5.sh` (env.sh: XLA mem 0.9, OPENPI_SAVE_TRAIN_STATE=0, JAX_COMPILATION_CACHE_DIR=$DART_ROOT/jax-cache, WANDB_MODE=offline).
+  train.py 인자 확인: batch 64, 1000 step, `--log-interval=10 --overwrite`, checkpoint-base-dir=ckpts/a5/oneshot_src. 속도 7.0 s/step (v0 7.1), GPU 73.5GB·100%.
+- 이어서 17:35:29 `run_a5_after_ft.sh` 대기 시작: FT ALL_DONE rc=0 → `run_dart_merge_a5.sh 0.5` (run_dart_merge.sh 에서 CK/OUT/LOG 경로만 변경) → HF a5/dart_a0.5 → 평가 6개 순차 → git commit.
+- 예상: src ~19:40, tgt ~21:45, 합성 ~22:10, 평가 끝 ~23:45.
