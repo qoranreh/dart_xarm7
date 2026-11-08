@@ -65,3 +65,21 @@ env: `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1`, env.sh + client_env.sh (MUJOCO_
   train.py 인자 확인: batch 64, 1000 step, `--log-interval=10 --overwrite`, checkpoint-base-dir=ckpts/a5/oneshot_src. 속도 7.0 s/step (v0 7.1), GPU 73.5GB·100%.
 - 이어서 17:35:29 `run_a5_after_ft.sh` 대기 시작: FT ALL_DONE rc=0 → `run_dart_merge_a5.sh 0.5` (run_dart_merge.sh 에서 CK/OUT/LOG 경로만 변경) → HF a5/dart_a0.5 → 평가 6개 순차 → git commit.
 - 예상: src ~19:40, tgt ~21:45, 합성 ~22:10, 평가 끝 ~23:45.
+- **18:35 사용자 결정 (가): 합성·평가는 A6000 으로** (CLAUDE.md "A100 은 80GB 필요한 단계만"). 이 잡의 대기 러너 `run_a5_after_ft.sh` 중단 (pgid 1615085 kill, FT 는 계속).
+  이 A100 잡은 FT 2회 + HF 백업까지만 하고 exit. 노트북은 안 됨: RAM 30GB < 합성 45GiB, GPU 8GB, EGL 렌더라 v0(OSMesa) 와 픽셀 다름.
+
+## 5. 다음 세션 할 일 — A6000 잡에서 합성·평가 (사용자가 21시쯤 `coss_a6gpu` 잡을 띄움)
+
+FT 잡(133826)은 끝나면 `~/hayeon/dart_xarm7/logs/oneshot_ft_a5/status.txt` (홈, 노드 공용) 에 `src/tgt HF 백업 rc=0: … 크기 일치 True` 를 남긴다 (예상 21:50).
+A6000 컨테이너 안에서:
+
+1. 복원: `/var/tmp` 여유를 보고 — ≥ 75G 면 그대로, 모자라면 `DART_SHM=/dev/shm/introai34_dart_<잡번호>` 를 붙여서
+   `setsid nohup bash ~/hayeon/dart_xarm7/restore_env.sh > /dev/null 2>&1 < /dev/null &` → `$DART_ROOT/logs/restore/status.txt` 에 ALL_DONE.
+   (A6000 잡 메모리 한도 128GB. /dev/shm 사용이 잡 메모리로 잡히는지는 확인 필요 — 합성 RAM 최대 45GiB + /dev/shm ~70G 면 빠듯할 수 있음.)
+   osmesa 단계가 conda HTTP 오류로 rc=1 이면 한 번 더 (이 잡에서 1회 실패 → 재시도 성공). 합성·평가에는 dart_oneshot_ft.patch 불필요.
+2. `FROM_HF=1 setsid nohup bash ~/hayeon/dart_xarm7/run_a5_after_ft.sh > /dev/null 2>&1 < /dev/null &`
+   → 홈 status 에 src·tgt 백업 완료가 찍힐 때까지 대기 → HF `a5/oneshot_{src,tgt}` 를 `ckpts/a5/oneshot_*/pi05_libero_oneshotft/original/999` 로 받기·대조
+   → `run_dart_merge_a5.sh 0.5` (CPU) → HF `a5/dart_a0.5` 백업 → 평가 6개 순차 → results/a5_* git commit. 진행 `$DART_ROOT/eval/status_a5.txt`.
+3. 끝나면: 프롬프트 7번 (θ*_t5 t5 실패 영상 ≤10개 유형: 빈손으로 닫힘 / 기운 채 잡힘 / 램킨째 들림 / 놓기 3cm 밖 / 기타, ORACLE_T45_LOG.md 11절) → STOP2 3줄 보고
+   (t5×50 4개 + Fisher p 2개, 나머지 9 task 90회 θ*_t5 vs θ*_t0(기존 results/v0_dart_a0.5, t5 제외 70/90) vs θ_tgt_t5 + 95% CI, H_fix/H_nofix/trade-off 판정).
+   평가 GPU 가 v0(A100) 와 다름 → 표에 명시. /dev/shm 을 썼으면 잡 끝에 rm -rf.

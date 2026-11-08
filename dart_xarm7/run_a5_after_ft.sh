@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # [실험 4-후속3 a5] FT(run_oneshot_ft_a5.sh) 가 끝나면 → 합성(run_dart_merge_a5.sh 0.5, 공식 CPU 경로) → HF a5/dart_a0.5 백업
 #   → 평가 6개 (순차, exp6_env v0, seed 7 = eval_xarm7.py 기본, 클라이언트 5개) → results/a5_* · 로그 git commit.
-# FT 와 같이 띄워 두면 FT status 의 ALL_DONE rc=0 을 기다렸다가 시작한다 (FT 중 평가 금지, 합성·평가 동시 실행 금지 — 모두 순차).
+# FT 와 같은 잡에서 띄우면 FT status 의 ALL_DONE rc=0 을 기다렸다가 시작한다 (FT 중 평가 금지, 합성·평가 동시 실행 금지 — 모두 순차).
+# 다른 잡(A6000)에서는 FROM_HF=1: 홈의 logs/oneshot_ft_a5/status.txt 에 src·tgt HF 백업 완료가 찍히면 HF a5/oneshot_{src,tgt} 를 받아 시작.
+#   (A6000 잡: restore_env.sh 로 복원 후) FROM_HF=1 setsid nohup bash ~/hayeon/dart_xarm7/run_a5_after_ft.sh > /dev/null 2>&1 < /dev/null &
 #   setsid nohup bash ~/hayeon/dart_xarm7/run_a5_after_ft.sh > /dev/null 2>&1 < /dev/null &
 # 진행: $DART_ROOT/eval/status_a5.txt, 평가 실행 로그 $DART_ROOT/eval/run_a5.log
 # 이미 끝난 단계(합성 END rc=0, 에피소드 수 다 차고 에러 0 인 평가 태그)는 건너뛰므로 중간에 죽으면 다시 띄우면 이어서 한다.
@@ -25,11 +27,30 @@ hf_env() { HF_TOKEN_PATH=$HOME/.cache/huggingface/token HF_HUB_DISABLE_PROGRESS_
 log "=== [a5] 합성·평가 러너 시작 (job $PBS_JOBID, $(hostname), XARM7_COLOR=$XARM7_COLOR XARM7_DYNAMICS=$XARM7_DYNAMICS) — FT 끝 대기 ==="
 
 # ---- 1. FT 끝 대기 ----
-until grep -q "=== ALL_DONE" "$FTST" 2>/dev/null; do sleep 60; done
-if ! grep -q "=== ALL_DONE rc=0" "$FTST" || [ ! -d "$SRC/params" ] || [ ! -d "$TGT/params" ]; then
-  log "FT 실패 또는 체크포인트 없음 — 중단 ($(grep 'ALL_DONE' "$FTST" | tail -1))"; exit 1
+if [ "${FROM_HF:-0}" = 1 ]; then
+  # 다른 잡(A6000 등)에서: FT 잡이 홈으로 복사한 status 에 src·tgt HF 백업 "크기 일치 True" 가 찍히면 HF 에서 받는다 (2026-11-08 사용자 결정: FT 만 A100).
+  HST=$H/logs/oneshot_ft_a5/status.txt
+  log "FROM_HF=1 — $HST 에 src·tgt HF 백업 완료가 찍힐 때까지 대기"
+  until [ "$(grep -cE '(src|tgt) HF 백업 rc=0: a5/oneshot_(src|tgt): .*크기 일치 True' "$HST" 2>/dev/null)" -ge 2 ]; do
+    grep -qE "중단|실패|단계를 모두|HF 백업 rc=[1-9]" "$HST" 2>/dev/null && { log "FT 잡이 실패/중단으로 끝남 — 중단: $(grep -E '중단|실패' "$HST" | tail -1)"; exit 1; }
+    sleep 120
+  done
+  for r in src tgt; do
+    d=$CK/a5/oneshot_$r/pi05_libero_oneshotft/original/999
+    [ -d "$d/params" ] && { log "$r 체크포인트 이미 있음 — 받기 건너뜀"; continue; }
+    ( cd "$DART_REPO" && hf_env .venv/bin/python $H/fetch_ckpts_hf.py "$CK/a5/_hf" "a5/oneshot_$r" ) >> $DART_ROOT/logs/a5_fetch_hf.log 2>&1 ||
+      { log "HF a5/oneshot_$r 받기/대조 실패 — 중단 ($DART_ROOT/logs/a5_fetch_hf.log)"; exit 1; }
+    mkdir -p "$(dirname "$d")" && mv "$CK/a5/_hf/a5/oneshot_$r" "$d"
+    log "HF a5/oneshot_$r → $d ($(grep "^a5/oneshot_$r" $DART_ROOT/logs/a5_fetch_hf.log | tail -1 | sed 's/.*: 로컬/로컬/'))"
+  done
+  [ -d "$SRC/params" ] && [ -d "$TGT/params" ] || { log "체크포인트 없음 — 중단"; exit 1; }
+else
+  until grep -q "=== ALL_DONE" "$FTST" 2>/dev/null; do sleep 60; done
+  if ! grep -q "=== ALL_DONE rc=0" "$FTST" || [ ! -d "$SRC/params" ] || [ ! -d "$TGT/params" ]; then
+    log "FT 실패 또는 체크포인트 없음 — 중단 ($(grep 'ALL_DONE' "$FTST" | tail -1))"; exit 1
+  fi
 fi
-log "FT 완료 확인 — $(grep -cE ' (src|tgt) DONE ' "$FTST") 러닝 DONE"
+log "FT 체크포인트 확인 — src $(du -sh "$SRC" | cut -f1), tgt $(du -sh "$TGT" | cut -f1)"
 
 # ---- 2. 합성 (CPU) ----
 if grep -q "END rc=0" "$MLOG" 2>/dev/null && [ -d "$TS/params" ]; then
