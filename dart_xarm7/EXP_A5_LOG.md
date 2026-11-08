@@ -43,3 +43,11 @@ env: `OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1`, env.sh + client_env.sh (MUJOCO_
 → **STOP1 통과.** 다음은 본 단계 1 (FT) — A6000 46GB 에서는 불가, A100 잡에서. 데이터셋은 홈에 있어 그대로 쓰면 됨.
 - 휘발성 주의: `$DART_ROOT/demos/a5/*.npz` 는 이 잡 /var/tmp 에만 있음 (FT 에는 불필요, 데이터셋만 필요).
 - 홈 사용량 27,878 MiB (데이터셋 35M 추가 후).
+
+## 3. STOP1 산출물 HF 백업 (2026-11-08, 잡 133746) — FT 는 RunPod A100 에서 할 예정
+
+- `upload_folder_hf.py ~/hayeon/dart_xarm7/data/lerobot/a5 a5/data/lerobot` → 10/10 파일, 크기 일치, 0.03 GiB
+- `upload_folder_hf.py $DART_ROOT/a5_demos_up a5/demos` (demos/a5/* + spatial_t5_hdf5_demo0-4.npz) → 5/5 파일, 크기 일치, 0.04 GiB
+- RunPod 에서 받기 (data/ 는 .gitignore 라 git 에 없음):
+  `huggingface_hub.snapshot_download("qoranreh/dart-xarm7-oneshot", allow_patterns=["a5/data/*"], local_dir=<dir>)`
+  → `<dir>/a5/data/lerobot/libero_spatial_t5_demo_0_{src_panda,tgt_xarm7_retarget_rotclip}` 를 `~/hayeon/dart_xarm7/data/lerobot/a5/` 로.
