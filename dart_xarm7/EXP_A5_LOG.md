@@ -17,7 +17,7 @@
 - 2026-11-08 13:52 시작, `setsid nohup bash ~/hayeon/dart_xarm7/restore_env.sh`. DART_ROOT=/var/tmp/pbs.133746.ECE-util1/dart (/dev/shm 링크 없음, /var/tmp 여유 99G).
 - 13:52:17 → 14:12:39 ALL_DONE (20분). repo 42s, uv_sync 169s, osmesa 731s, hf_ckpts 581s (v0 oneshot_src/tgt·dart_a0.5), libero_venv 873s, theta0 1011s. 끝 /var/tmp 여유 52G, 사용 47G.
 - 이상 징후: pip 다운로드 ~100kB/s (θ0·HF 동시 다운로드와 대역폭 경쟁) → libero_venv 가 평소보다 느림.
-- **설치 추가 (사용자 승인 2026-11-08):** libero venv 에 `h5py==3.16.0` (`pip install --no-cache-dir -c ~/venvs/dart-libero-constraints.txt h5py`).
+- **설치 추가 (2026-11-08, 사전 안내 후 사용자의 "시작" 지시로 진행 — 명시적 승인은 아님):** libero venv 에 `h5py==3.16.0` (`pip install --no-cache-dir -c ~/venvs/dart-libero-constraints.txt h5py`).
   노트북판 fetch_hdf5_demo.py 가 task≠0 이면 `$LIBERO_PY` 를 요구하는데 서버 venv·이미지에 h5py 가 없었음. numpy 1.22.2·torch 2.1.0a0+32f93b1 은 이미지 경로 그대로 (확인).
   `~/venvs/dart-libero-requirements.txt` 에 한 줄 추가 → 다음 잡부터 restore_env.sh 가 같이 설치.
 
