@@ -1,0 +1,5 @@
+tag=a5_dart_t5_vid (실패 영상용 재실행, a5_dart_t5 와 같은 설정 + --save-all-videos)
+cond=v0 XARM7_COLOR=white XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.133903.ECE-util1/dart/ckpts/a5/dart_a0.5
+tasks=5 trials=50 nclient=5 seed=7
+job=133903.ECE-util1 host=ece-a6gpu7 start=2026-11-09 00:04:07

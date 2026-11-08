@@ -27,7 +27,7 @@ PIDS=()
 for c in $(seq 0 $((NCLIENT - 1))); do
   $LIBERO_PY ~/hayeon/dart_xarm7/eval_xarm7.py --port "$PORT" --robot "$ROBOT" --task-suite-name "$SUITE" \
     --task-ids $TASKS --trials "$TRIALS" --shard "$c" --nshard "$NCLIENT" --tag "$TAG" \
-    --results-path "$RES/client$c.jsonl" --video-out-path "$EV/videos" > "$EV/client$c.log" 2>&1 &
+    --results-path "$RES/client$c.jsonl" --video-out-path "$EV/videos" ${EVAL_EXTRA_ARGS:-} > "$EV/client$c.log" 2>&1 &
   PIDS+=($!)
 done
 FAIL=0

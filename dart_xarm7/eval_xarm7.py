@@ -52,6 +52,7 @@ class Args:
     tag: str = ""
     results_path: str = "results.jsonl"
     video_out_path: str = "videos"
+    save_all_videos: bool = False  # 2026-11-09 a5 실패 유형 분석용: True 면 ep0 만이 아니라 모든 에피소드 영상 저장 (결과·동작 무관)
 
 
 def make_env(task, robot, res, seed):
@@ -105,7 +106,7 @@ def main(args: Args) -> None:
                 wrist = np.ascontiguousarray(obs["robot0_eye_in_hand_image"][::-1, ::-1])
                 img = image_tools.convert_to_uint8(image_tools.resize_with_pad(img, args.resize_size, args.resize_size))
                 wrist = image_tools.convert_to_uint8(image_tools.resize_with_pad(wrist, args.resize_size, args.resize_size))
-                if ep == 0:
+                if ep == 0 or args.save_all_videos:
                     frames.append(np.concatenate([img, wrist], axis=1))
                 if not action_plan:
                     element = {"observation/image": img, "observation/wrist_image": wrist,
@@ -129,8 +130,8 @@ def main(args: Args) -> None:
         out.write(json.dumps(rec) + "\n")
         out.flush()
         logging.info("%s task %d ep %d success=%s steps=%d %.0fs", args.tag, task_id, ep, done, rec["steps"], rec["sec"])
-        if ep == 0 and frames:
-            imageio.mimwrite(pathlib.Path(args.video_out_path) / f"{args.tag}_t{task_id}_ep0_{'success' if done else 'failure'}.mp4",
+        if (ep == 0 or args.save_all_videos) and frames:
+            imageio.mimwrite(pathlib.Path(args.video_out_path) / f"{args.tag}_t{task_id}_ep{ep}_{'success' if done else 'failure'}.mp4",
                              frames, fps=10)
 
 
