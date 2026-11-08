@@ -1,0 +1,6 @@
+tag=a5_theta_tgt_rest
+cond=v0 XARM7_COLOR=white XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero_oneshotft dir=/var/tmp/pbs.133903.ECE-util1/dart/ckpts/a5/oneshot_tgt/pi05_libero_oneshotft/original/999
+suite=libero_spatial tasks=0 1 2 3 4 6 7 8 9 trials=10 nclient=5 seed=7
+job=133903.ECE-util1 host=ece-a6gpu7 start=2026-11-08 23:24:06
+end=2026-11-08 23:46:22 wall=1336s rc=0
