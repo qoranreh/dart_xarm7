@@ -104,7 +104,7 @@ ev a5_dart_rest      pi05_libero          "$TS"     "$REST" 10
 # ---- 4. 기록 ----
 wait $UP
 cp "$ST" $H/logs/oneshot_ft_a5/status_a5_eval.txt
-( cd ~/hayeon && git add dart_xarm7/results/a5_* dart_xarm7/logs/oneshot_ft_a5 &&
+( cd ~/hayeon && git add dart_xarm7/results/a5_* dart_xarm7/EXP_A5_LOG.md &&   # logs/ 는 .gitignore (홈에만 둠)
   git commit -q -m "실험 4-후속3 (a5): FT 2회·합성 α=0.5·평가 6개 결과 (잡 $PBS_JOBID, $(hostname))
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && log "git commit $(git -C ~/hayeon log --oneline -1)" ) || log "git commit 실패/변경 없음"

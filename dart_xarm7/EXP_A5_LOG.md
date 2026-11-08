@@ -83,3 +83,27 @@ A6000 컨테이너 안에서:
 3. 끝나면: 프롬프트 7번 (θ*_t5 t5 실패 영상 ≤10개 유형: 빈손으로 닫힘 / 기운 채 잡힘 / 램킨째 들림 / 놓기 3cm 밖 / 기타, ORACLE_T45_LOG.md 11절) → STOP2 3줄 보고
    (t5×50 4개 + Fisher p 2개, 나머지 9 task 90회 θ*_t5 vs θ*_t0(기존 results/v0_dart_a0.5, t5 제외 70/90) vs θ_tgt_t5 + 95% CI, H_fix/H_nofix/trade-off 판정).
    평가 GPU 가 v0(A100) 와 다름 → 표에 명시. /dev/shm 을 썼으면 잡 끝에 rm -rf.
+
+### 4-1. FT src 결과 (잡 133826)
+| 항목 | a5 θ_src (t5 Panda) | v0 θ_src (t0, ONESHOT_FT.md) |
+|---|---|---|
+| 학습 시간 | 17:35:31 → 19:38:40, train_wall 7389s (2h03m), bf16 변환 47s | ≈2h |
+| loss step 0 → 990 | 0.0071 → 0.0025 | 0.0041 → 0.0015 |
+| 마지막 100스텝 평균 (900~990, 10개) | 0.0026 | 0.0018 |
+| 체크포인트 | `ckpts/a5/oneshot_src/pi05_libero_oneshotft/original/999` bf16 4.9G | |
+| HF 백업 | `a5/oneshot_src`: 64/64 파일, 크기 일치 True, 4.90 GiB (19:44:38) | |
+- OOM 없음 (mem 0.9, batch 64 첫 시도). tgt 19:39:27 시작.
+
+### 4-2. FT tgt 결과 + 마무리 (잡 133826)
+| 항목 | a5 θ_tgt (t5 xArm7 retarget rotclip) | v0 θ_tgt (t0) |
+|---|---|---|
+| 학습 시간 | 19:39:27 → 21:38:51, train_wall 7164s (1h59m), bf16 변환 61s | ≈2h |
+| loss step 0 → 990 | 0.0875 → 0.0023 | 0.1218 → 0.0026 |
+| 마지막 100스텝 평균 (900~990, 10개) | 0.0028 | 0.0022 |
+| 체크포인트 | `ckpts/a5/oneshot_tgt/pi05_libero_oneshotft/original/999` bf16 4.9G | |
+| HF 백업 | `a5/oneshot_tgt`: 71/71 파일, 크기 일치 True, 4.90 GiB (21:45:45) | |
+- `=== ALL_DONE rc=0 ===` 21:45:45. OOM 없음. 이상 징후: 없음 (src 64 파일 / tgt 71 파일로 파일 수가 다르지만 둘 다 HF 와 일치, 4.90 GiB — orbax 저장 조각 수 차이로 보임, 확인 안 함).
+- step 0 loss: tgt 0.0875 ≫ src 0.0071 — v0 와 같은 패턴 (θ0 가 Panda 는 이미 잘하고 xArm7 retarget 액션은 낯섦).
+- 로그 홈 복사: `logs/oneshot_ft_a5/` (status·data_check·src/tgt 학습 로그·HF 업로드 로그 — `logs/` 는 .gitignore 라 git 에는 없음, 홈에만). 홈 status 에 A6000 러너 신호 2줄 확인.
+- run_a5_after_ft.sh 마지막 git add 에서 logs/ 를 빼고 results/a5_* + EXP_A5_LOG.md 만 (ignore 경로를 넣으면 add 전체가 실패해 커밋이 안 됨).
+- 정리: `/dev/shm/introai34_dart_133826` 삭제 (체크포인트는 HF 에 대조 완료). 이 잡은 exit.
