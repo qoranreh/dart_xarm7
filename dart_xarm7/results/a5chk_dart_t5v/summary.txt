@@ -1,0 +1,1 @@
+a5chk_dart_t5v (XArm7): 6/10 = 60.0%  | t5:6/10 | errors=0

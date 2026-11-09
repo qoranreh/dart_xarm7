@@ -1,0 +1,6 @@
+tag=a5chk_theta0_t5v
+cond=v0 XARM7_COLOR=white XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.133903.ECE-util1/dart/openpi-cache/openpi-assets/checkpoints/pi05_libero
+suite=libero_spatial tasks=5 trials=10 nclient=5 seed=7 --save-all-videos MESA_SHADER_CACHE_DIR=local
+job=133903.ECE-util1 host=ece-a6gpu7 gpu=NVIDIA RTX A6000 start=2026-11-09 15:36:28
+end=2026-11-09 15:46:46 wall=618s rc=0

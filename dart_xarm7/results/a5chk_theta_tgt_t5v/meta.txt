@@ -1,0 +1,6 @@
+tag=a5chk_theta_tgt_t5v
+cond=v0 XARM7_COLOR=white XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero_oneshotft dir=/var/tmp/pbs.133903.ECE-util1/dart/ckpts/a5/oneshot_tgt/pi05_libero_oneshotft/original/999
+suite=libero_spatial tasks=5 trials=10 nclient=5 seed=7 --save-all-videos MESA_SHADER_CACHE_DIR=local
+job=133903.ECE-util1 host=ece-a6gpu7 gpu=NVIDIA RTX A6000 start=2026-11-09 15:46:54
+end=2026-11-09 16:04:23 wall=1049s rc=0

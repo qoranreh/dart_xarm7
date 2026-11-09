@@ -1,0 +1,1 @@
+a5chk_theta0_t5v (XArm7): 2/10 = 20.0%  | t5:2/10 | errors=0
