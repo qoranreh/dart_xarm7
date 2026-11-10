@@ -1,0 +1,6 @@
+tag=a0al_a0.8_t0
+cond=v0 XARM7_COLOR=white XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.134629.ECE-util1/dart/ckpts/dart_a0.8
+suite=libero_spatial tasks=0 trials=50 nclient=5 seed=7 --save-all-videos MESA_SHADER_CACHE_DIR=local
+job=134629.ECE-util1 host=ece-a6gpu8 gpu=NVIDIA RTX A6000 start=2026-11-11 00:43:17
+end=2026-11-11 00:51:05 wall=468s rc=0

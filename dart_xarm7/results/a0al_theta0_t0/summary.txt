@@ -1,0 +1,1 @@
+a0al_theta0_t0 (XArm7): 17/50 = 34.0%  | t0:17/50 | errors=0
