@@ -1,0 +1,154 @@
+{
+ "alpha_star": "0.2",
+ "alpha_choice": {
+  "means": "0.2:90.0 0.4:81.2 0.6:72.5 0.8:62.5 1.0:48.8 (θ0 63.8)",
+  "t0_only_best": "0.2 (동률: 0.2; 참고만, 선택에는 안 씀)",
+  "recorded": "2026-11-26 21:56:49 (보고 task t1 t3 t5 t7 평가 전)"
+ },
+ "rows": {
+  "panda": {
+   "tag": "b13_panda",
+   "name": "θ0 · Panda (양성 대조)",
+   "by_task": {
+    "t1": 50,
+    "t3": 50,
+    "t5": 49,
+    "t7": 50
+   },
+   "success": 199,
+   "n": 200,
+   "rate": 99.5,
+   "cp_lo": 97.24581015424417,
+   "cp_hi": 99.98734189719902
+  },
+  "theta0": {
+   "tag": "b13_theta0",
+   "name": "zero-shot θ0 · xArm7",
+   "by_task": {
+    "t1": 35,
+    "t3": 29,
+    "t5": 8,
+    "t7": 28
+   },
+   "success": 100,
+   "n": 200,
+   "rate": 50.0,
+   "cp_lo": 42.86584309068122,
+   "cp_hi": 57.134156909318776
+  },
+  "tgt": {
+   "tag": "b13_tgt",
+   "name": "원샷 FT θ_tgt · xArm7",
+   "by_task": {
+    "t1": 0,
+    "t3": 0,
+    "t5": 0,
+    "t7": 0
+   },
+   "success": 0,
+   "n": 200,
+   "rate": 0.0,
+   "cp_lo": 0.0,
+   "cp_hi": 1.82753403551488
+  },
+  "dart": {
+   "tag": "b13_dart_main",
+   "name": "DART θ*(α*=0.2) · xArm7",
+   "by_task": {
+    "t1": 49,
+    "t3": 49,
+    "t5": 11,
+    "t7": 33
+   },
+   "success": 142,
+   "n": 200,
+   "rate": 71.0,
+   "cp_lo": 64.1812547837709,
+   "cp_hi": 77.1843010636583
+  },
+  "dart04": {
+   "tag": "b13_dart_a0.4",
+   "name": "DART θ*(α=0.4, 참고·논문 값) · xArm7",
+   "by_task": {
+    "t1": 48,
+    "t3": 50,
+    "t5": 8,
+    "t7": 33
+   },
+   "success": 139,
+   "n": 200,
+   "rate": 69.5,
+   "cp_lo": 62.61321954660553,
+   "cp_hi": 75.79805629764085
+  }
+ },
+ "comparisons": {
+  "H1": {
+   "diff_pp": 21.0,
+   "ci_lo": 13.5,
+   "ci_hi": 28.5,
+   "only_a": 56,
+   "only_b": 14,
+   "mcnemar_p": 4.3028401315359276e-07,
+   "by_task_pp": {
+    "t1": 28.000000000000004,
+    "t3": 40.0,
+    "t5": 6.0,
+    "t7": 10.0
+   },
+   "name": "DART(α*) − zero-shot",
+   "a": "b13_dart_main",
+   "b": "b13_theta0",
+   "verdict": "지지"
+  },
+  "H2": {
+   "diff_pp": 71.0,
+   "ci_lo": 66.5,
+   "ci_hi": 75.5,
+   "only_a": 142,
+   "only_b": 0,
+   "mcnemar_p": 3.587324068671532e-43,
+   "by_task_pp": {
+    "t1": 98.0,
+    "t3": 98.0,
+    "t5": 22.0,
+    "t7": 66.0
+   },
+   "name": "DART(α*) − 원샷 FT",
+   "a": "b13_dart_main",
+   "b": "b13_tgt",
+   "verdict": "지지"
+  },
+  "ref": {
+   "diff_pp": 1.5,
+   "ci_lo": -4.0,
+   "ci_hi": 7.0,
+   "only_a": 18,
+   "only_b": 15,
+   "mcnemar_p": 0.7283324808813632,
+   "by_task_pp": {
+    "t1": 2.0,
+    "t3": -2.0,
+    "t5": 6.0,
+    "t7": 0.0
+   },
+   "name": "DART(α*) − DART(0.4)",
+   "a": "b13_dart_main",
+   "b": "b13_dart_a0.4",
+   "verdict": "참고 (판정 규칙 없음)"
+  }
+ },
+ "judgment": {
+  "controls_pass": true,
+  "H1_dart_vs_zeroshot": "지지",
+  "H2_dart_vs_oneshot": "지지",
+  "go_exp12": true,
+  "card_hypothesis": "H1"
+ },
+ "method": {
+  "bootstrap": "task 층화 짝 부트스트랩 (각 task 안에서 50쌍 복원추출), 10000회, 비교마다 default_rng(0), 백분위 2.5·97.5",
+  "mcnemar": "엇갈린 쌍 이항 검정 (p=0.5) 양측 정확",
+  "ci_rate": "Clopper–Pearson 95%",
+  "generated": "2026-11-27 01:19:39"
+ }
+}
