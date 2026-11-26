@@ -1,0 +1,7 @@
+tag=b13_cal_theta0
+cond=v0 XARM7_COLOR=white XARM7_DYNAMICS=panda
+server=serve_ckpt config=pi05_libero dir=/var/tmp/pbs.142850.ECE-util1/dart/openpi-cache/openpi-assets/checkpoints/pi05_libero
+robot=XArm7 suite=libero_spatial tasks=0 2 4 6 trials=20 nclient=5 seed=7 videos=default(ep0) MESA_SHADER_CACHE_DIR=local
+note=α=0 기준 행
+job=142850.ECE-util1 host=ece-agpu7 gpu=NVIDIA A100-SXM4-80GB start=2026-11-26 20:16:29
+end=2026-11-26 20:32:55 wall=986s rc=0
