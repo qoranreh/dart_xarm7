@@ -1,0 +1,2 @@
+{"tag": "b13_s1_panda_t4", "robot": "Panda", "task_id": 4, "episode": 2, "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate", "success": true, "steps": 112, "sec": 54.6, "error": null}
+{"tag": "b13_s1_panda_t4", "robot": "Panda", "task_id": 4, "episode": 7, "task": "pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate", "success": true, "steps": 126, "sec": 53.7, "error": null}
